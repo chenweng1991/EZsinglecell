@@ -21,7 +21,12 @@ pbmc <- new("seurat", raw.data = data)
 pbmc <- Setup(pbmc, min.cells = 3, min.genes = 200, do.logNormalize = T, total.expr = 1e4, project = "10X_PBMC")
 pbmc@var.genes<-row.names(x=mylist)
 mito.genes <- grep("^MT-", rownames(pbmc@data), value = T)
-percent.mito <- colSums(expm1(pbmc@data[mito.genes, ]))/colSums(expm1(pbmc@data))
+if(length(mito.genes)!=0){
+	percent.mito <- colSums(expm1(pbmc@data[mito.genes, ]))/colSums(expm1(pbmc@data))
+}else{
+	percent.mito<-rep(0,ncol(pbmc@data))
+	names(percent.mito)<-colnames(pbmc@data)
+}
 pbmc <- AddMetaData(pbmc, percent.mito, "percent.mito")
 basic<-VlnPlot(pbmc, c("nGene", "nUMI", "percent.mito"),size.use=0.3,do.ret=TRUE)
 pbmc <- SubsetData(pbmc, subset.name = "nGene", accept.high = 2500)
@@ -83,7 +88,7 @@ return(Istopcells)
 #' GetinformativeGene(dgepreprocess(s7.RockII_1.dge,500,norowname=T),500)
 GetinformativeGene<-function(Istopcells,Number,cutoff=0.95){
 require(dplyr)
-require(raster)
+#require(raster)
 data<-as.data.frame(Istopcells)
 expvalue<-function(vector){
 x<-5000*vector/sum(vector[1:length(vector)-1])
