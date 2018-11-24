@@ -48,15 +48,17 @@ GettsnesignatureSuper(object, object.all, signiture = c("INS", "RBP4","FFAR4", "
 ```
 
 ### All functions included
-- Fullplot_v2
--GetPCAcelldata_v2
--GetPCheat
--GetinformativeGene
--Gettopgenes
--GettsnesignatureSuper
--Tomerge
--Tomerge_v2
--dgepreprocess
--docluster              
--docluster.multi
--format2
+
+
+- Fullplot_v2             
+- GetPCAcelldata_v2
+- GetPCheat
+- GetinformativeGene
+- Gettopgenes
+- GettsnesignatureSuper
+- Tomerge
+- Tomerge_v2
+- dgepreprocess
+- docluster
+- docluster.multi
+- format2
