@@ -31,10 +31,6 @@ pbmc <- PCA(pbmc, pc.genes = pbmc@var.genes, do.print = TRUE, pcs.print = 5, gen
 pbmc <- ProjectPCA(pbmc)
 pbmc <- FindClusters(pbmc, pc.use = 1:10, resolution = reso, print.output = 0, save.SNN = T)
 pbmc <- RunTSNE(pbmc, dims.use = 1:10, do.fast = (ncol(Istopcells)>200))
-#To do a full plot below
-pdf(paste(name,"qc.pdf"))
-print(basic)
-dev.off()
 pbmc@data.info$Sample<-name
 return(pbmc)
 }
