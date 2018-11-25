@@ -47,10 +47,40 @@ Fullplot_v2(S7rock_1.ob,"S7rock_1.ob.pdf",topgene=NULL,resolusion="res.0.6",sign
 GettsnesignatureSuper(object, object.all, signiture = c("INS", "RBP4","FFAR4", "ID1", "ID2", "ID3", "DNAJB1"), doPCA = F, dotSNE = T,usePC34 = F, extratitle = "", toreturn = F, dotsize = 0.3,buttomgrey = T, nolegend = T, highcolor = "red")
 ```
 
+### Data included
+- Insulin regulator gene by Crispr-screening
+  - Crisp.t1
+  - Crisp.t2
+- DB/OB related GWAS data
+  - GWASdata
+- Surfaceome data
+  - Surfaceome.data
+- Prepare cell cycle data
+  - G1.S
+  - S
+  - G2.M
+  - M
+  - M.G1
+  - all.cellcycle
+- Transcription factor
+  - TFfromDBD
+- GSEA msigdb
+  - msig.db
+- Beta/alpha/delta/pp/episilon specific geneset
+  - all.Beta.maker
+  - allAlpha.marker
+  - delta.markers
+  - pp.markers
+  - epsilon.markers
+- Diabetes and obesity trajectory genes
+  - Beta.BMI.trj.genes
+  - Beta.T2D.trj.genes
+- Druggable gene
+  - gene_drug.db
+- Hocomoco genes
+  - Hocomocogenes
 ### All functions included
-
-
-- Fullplot_v2             
+- Fullplot_v2
 - GetPCAcelldata_v2
 - GetPCheat
 - GetinformativeGene

@@ -1,6 +1,8 @@
 #! /bin/bash
 cp /mnt/NFS/homeGene/JinLab/cxw486/eqtl-SNP/SNPstudy/BInomial.tier1 ./data-raw/
 cp /mnt/NFS/homeGene/JinLab/cxw486/eqtl-SNP/SNPstudy/BInomial.tier2 ./data-raw/
+cp /mnt/NFS/homeGene/JinLab/cxw486/Dropseq/DGEanalysis/Islet412+511+919+T2D1+S4/depth.nor/data.cnsis.report ./data-raw/
+
 cp /mnt/NFS/homeGene/JinLab/cxw486/eqtl-SNP/GWAS/GWAS2717.geneinformation ./data-raw/
 cp /mnt/NFS/homeGene/JinLab/cxw486/DBs/Surfasome/Surfaceome.data.csv ./data-raw/
 cp /mnt/NFS/homeGene/JinLab/cxw486/DBs/Cell-cycle/cellcycle.csv ./data-raw/
