@@ -251,12 +251,13 @@ return(mylist.un.100)
 #' @param dofindcluster if TRUE, do find clustering, default is true
 #' @param dotsne  if TRUE, do tsne, default is true
 #' @param acphi  accepted hiest gene number per cell, default is 2500(Should increase when processing fludigam data)
+#' @param mylist  A vector of genes that are used for analysis, default is numm, which toggle automated algorithm to decide informative genes
 #' @return this will return the clean and square plot
 #' @export
 #' @examples
 #' S7rock_1.S7<-docluster.multi(500,txcutoff=500,sets=list(s7.RockII_1=s7.RockII_1.dge,s7.B=s7.B.dge),nms=c("s7.RockII_1","s7.B"),israw=T)
 
-docluster.multi<-function(Number=500,txcutoff=500,sets,nms,selected=NULL,filterstuff=NULL,reso=0.6,israw=F,dofindcluster=T,dotsne=T,acphi=2500)
+docluster.multi<-function(Number=500,txcutoff=500,sets,nms,selected=NULL,filterstuff=NULL,reso=0.6,israw=F,dofindcluster=T,dotsne=T,acphi=2500,mylist=NULL)
 {
 	require(Seurat)
 	require(ggplot2)
@@ -294,7 +295,10 @@ docluster.multi<-function(Number=500,txcutoff=500,sets,nms,selected=NULL,filters
 	}
 	Mergedset[is.na(Mergedset)]<-0
 	data<-Matrix(as.matrix(Mergedset))
-	mylist<-GetinformativeGene(Mergedset,Number)
+	if(is.null(mylist))
+	{
+		mylist<-GetinformativeGene(Mergedset,Number)
+	}
 	pbmc <- new("seurat", raw.data = data)
 	pbmc <- Setup(pbmc, min.cells = 3, min.genes = 200, do.logNormalize = T, total.expr = 1e4, project = "10X_PBMC")
 	pbmc@var.genes<-row.names(x=mylist)
