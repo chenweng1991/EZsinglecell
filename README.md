@@ -34,6 +34,18 @@ GetinformativeGene(dgepreprocess(s7.RockII_1.dge,500,norowname=T),500),
 ```
 docluster.multi(Number=500,txcutoff=500,sets=list(s7.RockII_1=s7.RockII_1.dge,s7.B=s7.B.dge),nms=c("s7.RockII_1","s7.B"),israw=T)
 ```
+### DE analysis
+
+1. Make data pair that can be used for DE analysis and bubble plot
+```
+ROCKvsnorock.endo.paired<-datapair.mk(list(S7rock=S7rock_1.ob,S7=S7.ob),cols=c("Sample","Sample.2nd"),pick.list=list(c("s7.RockII_1"),c("s7.B_1")),normalizecellsize=F,randomizecelloirder=T)
+```
+### Run negtive binomial based differentially expression analysis
+```
+library(scran)  # Use computeSumFactors to compute size factor
+ROCKvsnorock.endo.tri.dummy<-DE.gettripple(ROCKvsnorock.endo.paired,cpcol="name")
+ROCKvsnorock.endo.de<-DoDE(ROCKvsnorock.endo.tri.dummy,"name",onlyoneSample=T,cpus=16)
+```
 
 ### Ploting
 
