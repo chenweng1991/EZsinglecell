@@ -147,134 +147,6 @@ DE.gettripple<-function(datapair,cpcol,withscran=F)
 }
 
 
-
-
-#' Donbregression
-#'
-#' This is an internal function for doDE
-#' @param data data
-#' @param info info
-#' @param cpcol cpcol
-#' @param reftype reftype
-#' @param sf sf
-#' @param gene gene
-#' @param onlyoneSample onlyoneSample
-#' @return This return the nb calculated p value and fold change
-#' @export
-#' @examples
-#'
-
-Donbregression<-function(data,info,cpcol,reftype,sf,gene,onlyoneSample)
-{
-	require(MASS)
-	info[,cpcol]<-factor(info[,cpcol],levels=c(reftype,setdiff(levels(info[,cpcol]),reftype)))
-	if(onlyoneSample)
-	{
-		md<-try(glm.nb(data[gene,] ~ info[,cpcol]+log(sf)),silent=T)
-	}else
-	{
-		md<-try(glm.nb(data[gene,] ~ info[,cpcol]+info[,"Sample"]+log(sf)),silent=T)
-	}
-				coeff.table<-try(summary(md)$coefficients,silent=T)
-				N<-2
-				output<-c()
-				for(i in setdiff(levels(info[,cpcol]),reftype))
-				{
-						p.value<-try(coeff.table[N,4],silent=T)
-						if(grepl("Error",p.value))
-						{
-								p.value<-NA
-						}
-			ref.mean<-mean(data[,row.names(info)[which(info[,cpcol]==reftype)]])
-			i.mean<-mean(data[,row.names(info)[which(info[,cpcol]==i)]])
-						assign(gene,data.frame(
-						ref.sum=as.integer(sum(data[gene,row.names(info)[which(info[,cpcol]==reftype)]])),
-						alt.sum=as.integer(sum(data[gene,row.names(info)[which(info[,cpcol]==i)]])),
-						ref.nonzero=as.integer(length(which(data[gene,row.names(info)[which(info[,cpcol]==reftype)]]>0))),
-						alt.nonzero=as.integer(length(which(data[gene,row.names(info)[which(info[,cpcol]==i)]]>0))),
-						nonzero.ratio=(length(which(data[gene,row.names(info)[which(info[,cpcol]==reftype)]]>0))/as.integer(as.matrix(table(info[,cpcol]))[reftype,]))/(length(which(data[gene,row.names(info)[which(info   [,cpcol]==i)]]>0))/as.integer(as.matrix(table(info[,cpcol]))[i,])),
-						mean.ratio=(mean(data[gene,row.names(info)[which(info[,cpcol]==reftype)]])/ref.mean)/(mean(data[gene,row.names(info)[which(info[,cpcol]==i)]])/i.mean),
-						p.value=p.value
-						))
-						cline<-get(gene)
-						row.names(cline)<-gene
-						clist<-list(cline)
-						names(clist)<-i
-						output<-c(output,clist)
-						N<-N+1
-				}
-				return(output)
-}
-
-
-
-#' calculateDE.sg
-#'
-#' This is an internal function for doDE
-#' @param data data
-#' @param info info
-#' @param cpcol cpcol
-#' @param sf sf
-#' @param gene gene
-#' @param onlyoneSample onlyoneSample
-#' @return  This return the paralelled calculated DE result.
-#' @export
-#' @examples
-#'
-
-calculateDE.sg<-function(data,info,cpcol,sf,gene,onlyoneSample){
-singlegene.result<-list()
-length(singlegene.result)<-length(levels(info[,cpcol]))
-names(singlegene.result)<-levels(info[,cpcol])
-for (reftype in levels(info[,cpcol])){
-	singlegene.result[[reftype]]<-Donbregression(data,info,cpcol,reftype,sf,gene,onlyoneSample)
-}
-return(singlegene.result)
-}
-
-#' rbindlist
-#'
-#' This is an internal function for doDE that combine result from paralell computation
-#' @param pardoresult pardoresult
-#' @param info info
-#' @param cpcol cpcol
-#' @return return a list that includes all DE result iteratively
-#' @export
-#' @examples
-#'
-
-rbindlist<-function(pardoresult,info,cpcol)
-{
-	print("Start binding......")
-	DEresult<-list()
-	length(DEresult)<-length(levels(info[,cpcol]))
-	names(DEresult)<-levels(info[,cpcol])
-	for (reftype in levels(info[,cpcol]))
-	{
-		DEresult[[reftype]]<-list(DEresult[[reftype]])
-		length(DEresult[[reftype]])<-length(levels(info[,cpcol]))-1
-		names(DEresult[[reftype]])<-setdiff(levels(info[,cpcol]),reftype)
-	}
-	n<-0
-	for(reftype in levels(info[,cpcol]))
-	{
-		print(n)
-		n<-n+1
-    		for (alttype in setdiff(levels(info[,cpcol]),reftype))
-    		{
-        		for (i in 1:length(pardoresult))
-        		{
-            			DEresult[[reftype]][[alttype]]<-rbind(DEresult[[reftype]][[alttype]],pardoresult[[i]][[reftype]][[alttype]])
-        		}
-    		}
-	cellnumber<-list(as.matrix(table(info[,cpcol]))[reftype,])
-	names(cellnumber)="cellnumber"
-	DEresult[[reftype]]<-c(DEresult[[reftype]],cellnumber)
-	}
-	return(DEresult)
-}
-
-
 #' DoDE
 #'
 #' This is the main function for calculating differentially expressed genes
@@ -289,6 +161,89 @@ rbindlist<-function(pardoresult,info,cpcol)
 
 DoDE<-function(tri.dummy,cpcol,onlyoneSample=F,cpus=16)
 {
+
+Donbregression<-function(data,info,cpcol,reftype,sf,gene,onlyoneSample){
+		require(MASS)
+		info[,cpcol]<-factor(info[,cpcol],levels=c(reftype,setdiff(levels(info[,cpcol]),reftype)))
+		if(onlyoneSample)
+		{
+			md<-try(glm.nb(data[gene,] ~ info[,cpcol]+log(sf)),silent=T)
+		}else
+		{
+			md<-try(glm.nb(data[gene,] ~ info[,cpcol]+info[,"Sample"]+log(sf)),silent=T)
+		}
+					coeff.table<-try(summary(md)$coefficients,silent=T)
+					N<-2
+					output<-c()
+					for(i in setdiff(levels(info[,cpcol]),reftype))
+					{
+							p.value<-try(coeff.table[N,4],silent=T)
+							if(grepl("Error",p.value))
+							{
+									p.value<-NA
+							}
+				ref.mean<-mean(data[,row.names(info)[which(info[,cpcol]==reftype)]])
+				i.mean<-mean(data[,row.names(info)[which(info[,cpcol]==i)]])
+							assign(gene,data.frame(
+							ref.sum=as.integer(sum(data[gene,row.names(info)[which(info[,cpcol]==reftype)]])),
+							alt.sum=as.integer(sum(data[gene,row.names(info)[which(info[,cpcol]==i)]])),
+							ref.nonzero=as.integer(length(which(data[gene,row.names(info)[which(info[,cpcol]==reftype)]]>0))),
+							alt.nonzero=as.integer(length(which(data[gene,row.names(info)[which(info[,cpcol]==i)]]>0))),
+							nonzero.ratio=(length(which(data[gene,row.names(info)[which(info[,cpcol]==reftype)]]>0))/as.integer(as.matrix(table(info[,cpcol]))[reftype,]))/(length(which(data[gene,row.names(info)[which(info   [,cpcol]==i)]]>0))/as.integer(as.matrix(table(info[,cpcol]))[i,])),
+							mean.ratio=(mean(data[gene,row.names(info)[which(info[,cpcol]==reftype)]])/ref.mean)/(mean(data[gene,row.names(info)[which(info[,cpcol]==i)]])/i.mean),
+							p.value=p.value
+							))
+							cline<-get(gene)
+							row.names(cline)<-gene
+							clist<-list(cline)
+							names(clist)<-i
+							output<-c(output,clist)
+							N<-N+1
+					}
+					return(output)
+	}
+
+calculateDE.sg<-function(data,info,cpcol,sf,gene,onlyoneSample){
+	singlegene.result<-list()
+	length(singlegene.result)<-length(levels(info[,cpcol]))
+	names(singlegene.result)<-levels(info[,cpcol])
+	for (reftype in levels(info[,cpcol])){
+		singlegene.result[[reftype]]<-Donbregression(data,info,cpcol,reftype,sf,gene,onlyoneSample)
+		}
+		return(singlegene.result)
+}
+
+rbindlist<-function(pardoresult,info,cpcol){
+		print("Start binding......")
+		DEresult<-list()
+		length(DEresult)<-length(levels(info[,cpcol]))
+		names(DEresult)<-levels(info[,cpcol])
+		for (reftype in levels(info[,cpcol]))
+		{
+			DEresult[[reftype]]<-list(DEresult[[reftype]])
+			length(DEresult[[reftype]])<-length(levels(info[,cpcol]))-1
+			names(DEresult[[reftype]])<-setdiff(levels(info[,cpcol]),reftype)
+		}
+		n<-0
+		for(reftype in levels(info[,cpcol]))
+		{
+			print(n)
+			n<-n+1
+	    		for (alttype in setdiff(levels(info[,cpcol]),reftype))
+	    		{
+	        		for (i in 1:length(pardoresult))
+	        		{
+	            			DEresult[[reftype]][[alttype]]<-rbind(DEresult[[reftype]][[alttype]],pardoresult[[i]][[reftype]][[alttype]])
+	        		}
+	    		}
+		cellnumber<-list(as.matrix(table(info[,cpcol]))[reftype,])
+		names(cellnumber)="cellnumber"
+		DEresult[[reftype]]<-c(DEresult[[reftype]],cellnumber)
+		}
+		return(DEresult)
+	}
+
+# main function starting from here
 data<-tri.dummy[[1]]
 info<-tri.dummy[[2]]
 sf<-tri.dummy[[3]]
