@@ -275,8 +275,7 @@ docluster.multi<-function(Number=500,txcutoff=500,sets,nms,selected=NULL,filters
 	if(length(sets)<2)
 	{
 	Mergedset<-as.matrix(Mergedset)
-	}else
-	{
+	}else{
 		for (i in 2: length(sets))
 		{
 			sets[[i]]<-sets[[i]][,colSums(sets[[i]])>txcutoff]
@@ -301,7 +300,7 @@ docluster.multi<-function(Number=500,txcutoff=500,sets,nms,selected=NULL,filters
 	}
 	pbmc <- new("seurat", raw.data = data)
 	pbmc <- Setup(pbmc, min.cells = 3, min.genes = 200, do.logNormalize = T, total.expr = 1e4, project = "10X_PBMC")
-	pbmc@var.genes<-row.names(x=mylist)
+	pbmc@var.genes<-mylist
 	mito.genes <- grep("^MT-", rownames(pbmc@data), value = T)
 	percent.mito <- colSums(expm1(pbmc@data[mito.genes, ]))/colSums(expm1(pbmc@data))
 	pbmc <- AddMetaData(pbmc, percent.mito, "percent.mito")

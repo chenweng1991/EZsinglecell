@@ -104,3 +104,6 @@ GettsnesignatureSuper(object, object.all, signiture = c("INS", "RBP4","FFAR4", "
 - docluster
 - docluster.multi
 - format2
+- datapair.mk
+- DE.gettripple
+- DoDE

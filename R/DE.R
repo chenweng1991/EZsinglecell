@@ -66,6 +66,7 @@ datapair.mk<-function(Seurat.ob.list,cols,pick.list,normalizecellsize=F,randomiz
 				info.current[,2]<-as.numeric(as.character(info.current[,2]))
 				colnames(info.current)[3]<-"name"
 				data.collect<-Tomerge_v2(data.collect,data.current)
+				data.collect[is.na(data.collect)]<-0
 				info.collect<-rbind(info.collect,info.current)
 			}
 		}
