@@ -4,9 +4,9 @@
 \alias{docluster.multi}
 \title{docluster.multi}
 \usage{
-docluster.multi(Number = 500, txcutoff = 500, sets, nms,
-  selected = NULL, filterstuff = NULL, reso = 0.6, israw = F,
-  dofindcluster = T, dotsne = T, acphi = 2500, mylist = NULL)
+docluster.multi(Number, txcutoff = 500, sets, nms, selected = NULL,
+  filterstuff = NULL, reso = 0.6, israw = F, dofindcluster = T,
+  dotsne = T, acphi = 2500)
 }
 \arguments{
 \item{Number}{the number of informative genes for clustering, default is 500}
@@ -30,8 +30,6 @@ docluster.multi(Number = 500, txcutoff = 500, sets, nms,
 \item{dotsne}{if TRUE, do tsne, default is true}
 
 \item{acphi}{accepted hiest gene number per cell, default is 2500(Should increase when processing fludigam data)}
-
-\item{mylist}{A vector of genes that are used for analysis, default is numm, which toggle automated algorithm to decide informative genes}
 }
 \value{
 this will return the clean and square plot
