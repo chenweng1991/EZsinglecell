@@ -43,5 +43,5 @@ return data pair that can be used for DE, bubble plot and others.
 This function is to make bubbleplot out of a data pair
 }
 \examples{
-Generalbubbleplot(ROCKvsnorock.non.paired,cpcol="name",genelist=c("TP53","TNFRSF1A","BAK1","CASP1"),)
+Generalbubbleplot(ROCKvsnorock.non.paired,cpcol="name",genelist=c("TP53","TNFRSF1A","BAK1","CASP1"),donormalscale=F)
 }

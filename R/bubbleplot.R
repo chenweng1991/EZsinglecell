@@ -17,7 +17,7 @@
 #' @return  return data pair that can be used for DE, bubble plot and others.
 #' @export
 #' @examples
-#' Generalbubbleplot(ROCKvsnorock.non.paired,cpcol="name",genelist=c("TP53","TNFRSF1A","BAK1","CASP1"),)
+#' Generalbubbleplot(ROCKvsnorock.non.paired,cpcol="name",genelist=c("TP53","TNFRSF1A","BAK1","CASP1"),donormalscale=F)
 
 Generalbubbleplot<-function(pair.data=NULL,cpcol="celltype2",toskip=NULL,genelist=NULL,hlen=30,llen=25,midlen=0,limlen=30,showcmcol=F,titlename="",angl=0,donormalscale=F,doreturn=F)
 #									#this is the column to do compare; toskip is used if one or more levels in cpcol is not gonna used for compare in bubble
@@ -84,7 +84,7 @@ Generalbubbleplot<-function(pair.data=NULL,cpcol="celltype2",toskip=NULL,genelis
 #' @param cpcol The column name for comparison, the default is name
 #' @return  return bubble plot for plotting
 #' @export
-#' @examples
+
 
 
 bubblePrep<-function(datapair,cpcol)

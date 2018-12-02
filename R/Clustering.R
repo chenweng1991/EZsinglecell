@@ -296,7 +296,7 @@ docluster.multi<-function(Number=500,txcutoff=500,sets,nms,selected=NULL,filters
 	data<-Matrix(as.matrix(Mergedset))
 	if(is.null(mylist))
 	{
-		mylist<-GetinformativeGene(Mergedset,Number)
+		mylist<-row.names(GetinformativeGene(Mergedset,Number))
 	}
 	pbmc <- new("seurat", raw.data = data)
 	pbmc <- Setup(pbmc, min.cells = 3, min.genes = 200, do.logNormalize = T, total.expr = 1e4, project = "10X_PBMC")
