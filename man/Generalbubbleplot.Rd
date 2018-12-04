@@ -7,7 +7,7 @@
 Generalbubbleplot(pair.data = NULL, cpcol = "celltype2",
   toskip = NULL, genelist = NULL, hlen = 30, llen = 25,
   midlen = 0, limlen = 30, showcmcol = F, titlename = "",
-  angl = 0, donormalscale = F, doreturn = F)
+  angl = 0, donormalscale = F, doreturn = F, usefacet = F)
 }
 \arguments{
 \item{pair.data}{the data pair that was prepred by datapair.mk}
@@ -35,12 +35,14 @@ Generalbubbleplot(pair.data = NULL, cpcol = "celltype2",
 \item{donormalscale}{If true,  further normalize to zero for all genes}
 
 \item{doreturn}{If true,  reurn a list including bubble data and bubble plot}
+
+\item{usefacet}{If true,  plot with facet, an extra column in genelist is required}
 }
 \value{
 return data pair that can be used for DE, bubble plot and others.
 }
 \description{
-This function is to make bubbleplot out of a data pair
+This function is to make bubbleplot out of a data pair.  Notice,  genelist is a dataframe that contain a column that is gene name, where the column name is "gene",  if fa facet plot is wanted , an extra column named "tag" is required
 }
 \examples{
 Generalbubbleplot(ROCKvsnorock.non.paired,cpcol="name",genelist=c("TP53","TNFRSF1A","BAK1","CASP1"),donormalscale=F)
