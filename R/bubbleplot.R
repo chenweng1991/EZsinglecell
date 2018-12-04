@@ -1,6 +1,6 @@
 #' Generalbubbleplot
 #'
-#' This function is to make bubbleplot out of a data pair
+#' This function is to make bubbleplot out of a data pair.  Notice,  genelist is a dataframe that contain a column that is gene name, where the column name is "gene",  if fa facet plot is wanted , an extra column named "tag" is required
 #' @param pair.data the data pair that was prepred by datapair.mk
 #' @param cpcol The column name for comparison, the default is name
 #' @param toskip A vector of variables from col(eg,  a cell type), that I don't want to show in bubble plot
@@ -14,12 +14,13 @@
 #' @param angl  The angle of x axis that I want it to rotate
 #' @param donormalscale  If true,  further normalize to zero for all genes
 #' @param doreturn  If true,  reurn a list including bubble data and bubble plot
+#' @param usefacet  If true,  plot with facet, an extra column in genelist is required
 #' @return  return data pair that can be used for DE, bubble plot and others.
 #' @export
 #' @examples
 #' Generalbubbleplot(ROCKvsnorock.non.paired,cpcol="name",genelist=c("TP53","TNFRSF1A","BAK1","CASP1"),donormalscale=F)
 
-Generalbubbleplot<-function(pair.data=NULL,cpcol="celltype2",toskip=NULL,genelist=NULL,hlen=30,llen=25,midlen=0,limlen=30,showcmcol=F,titlename="",angl=0,donormalscale=F,doreturn=F)
+Generalbubbleplot<-function(pair.data=NULL,cpcol="celltype2",toskip=NULL,genelist=NULL,hlen=30,llen=25,midlen=0,limlen=30,showcmcol=F,titlename="",angl=0,donormalscale=F,doreturn=F,usefacet=F)
 #									#this is the column to do compare; toskip is used if one or more levels in cpcol is not gonna used for compare in bubble
 {
 	require(RColorBrewer)
@@ -47,10 +48,11 @@ Generalbubbleplot<-function(pair.data=NULL,cpcol="celltype2",toskip=NULL,genelis
 		print(levels(pair.data$info[,ncol(pair.data$info)]))
 		stop("Please choose from above and set showcmcol as F")
 	}else{
-	newlevel<-setdiff(unique(pair.data$info[,cpcol]),toskip)
+	newlevel<-setdiff(levels(pair.data$info[,cpcol]),toskip)
 	pair.data$info<-pair.data$info[which(!(pair.data$info[,cpcol] %in% toskip)),]
 	pair.data$info[,cpcol]<-factor(pair.data$info[,cpcol],levels=newlevel)
-	bubbledata<-subset(bubblePrep(pair.data,cpcol), gene %in% genelist)
+	bubbledata<-subset(bubblePrep(pair.data,cpcol), gene %in% row.names(genelist))
+	bubbledata$groupname<-factor(bubbledata$groupname,levels=newlevel)
 		if(donormalscale)
 		{
 			scaled.result=c()
@@ -63,7 +65,15 @@ Generalbubbleplot<-function(pair.data=NULL,cpcol="celltype2",toskip=NULL,genelis
 				}
 				bubbledata<-scaled.result
 		}
-		bubbledata$gene<-factor(bubbledata$gene,levels=genelist)
+		bubbledata$gene<-factor(bubbledata$gene,levels=row.names(genelist))
+		if(usefacet)
+		{
+		bubbledata<-merge(bubbledata,genelist,by="gene")
+		p<-ggplot(bubbledata)
+		p<-p+aes(groupname,gene,color=log10(nTrance),size=nonzeroratio)+geom_point()+scale_color_gradientn(colors=Getpallet(hlen,llen,midlen,limlen))+ggtitle(titlename)
+		p<-p+theme(axis.text.x = element_text(angle = angl, hjust = 1))+facet_grid("tag~.",scales="free",space="free")
+		print(p)
+	}else
 		p<-ggplot(bubbledata)
 		p<-p+aes(groupname,gene,color=log10(nTrance),size=nonzeroratio)+geom_point()+scale_color_gradientn(colors=Getpallet(hlen,llen,midlen,limlen))+ggtitle(titlename)
 		p<-p+theme(axis.text.x = element_text(angle = angl, hjust = 1))

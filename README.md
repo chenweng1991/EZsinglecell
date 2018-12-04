@@ -59,9 +59,9 @@ Fullplot_v2(S7rock_1.ob,"S7rock_1.ob.pdf",topgene=NULL,resolusion="res.0.6",sign
 GettsnesignatureSuper(object, object.all, signiture = c("INS", "RBP4","FFAR4", "ID1", "ID2", "ID3", "DNAJB1"), doPCA = F, dotSNE = T,usePC34 = F, extratitle = "", toreturn = F, dotsize = 0.3,buttomgrey = T, nolegend = T, highcolor = "red")
 ```
 
-3. Generalbubbleplot,  to plot bubble plot for data pair
+3. Generalbubbleplot,  to plot bubble plot for data pair, df is a dataframe whose row name is gene name, there is an extra columns named "tag", that is used for facet if usefacet is set as T.
 ```
-Generalbubbleplot(ROCKvsnorock.non.paired,cpcol="name",genelist=c("TP53","TNFRSF1A","BAK1","CASP1"),donormalscale=F)
+Generalbubbleplot(ROCKvsnorock.non.paired,cpcol="name",genelist=df,donormalscale=F,usefacet=F)
 ```
 
 ### Data included

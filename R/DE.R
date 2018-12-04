@@ -70,6 +70,7 @@ datapair.mk<-function(Seurat.ob.list,cols,pick.list,normalizecellsize=F,randomiz
 				info.collect<-rbind(info.collect,info.current)
 			}
 		}
+		info.collect$name<-factor(info.collect$name,levels=unlist(pick.list))
 		return(list(data=data.collect,info=info.collect))
 }
 
