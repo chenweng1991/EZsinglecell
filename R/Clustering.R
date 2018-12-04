@@ -299,7 +299,14 @@ docluster.multi<-function(Number,txcutoff=500,sets,nms,selected=NULL,filterstuff
 	pbmc <- Setup(pbmc, min.cells = 3, min.genes = 200, do.logNormalize = T, total.expr = 1e4, project = "10X_PBMC")
 	pbmc@var.genes<-row.names(x=mylist)
 	mito.genes <- grep("^MT-", rownames(pbmc@data), value = T)
+	if (length(mito.genes)!=0)
+	{
 	percent.mito <- colSums(expm1(pbmc@data[mito.genes, ]))/colSums(expm1(pbmc@data))
+	}else{
+	percent.mito<-rep(0,length(colnames(pbmc@data)))
+	names(percent.mito)<-colnames(pbmc@data)
+  }
+
 	pbmc <- AddMetaData(pbmc, percent.mito, "percent.mito")
 	donor<-c()
 	for (i in 1: length(sets))
