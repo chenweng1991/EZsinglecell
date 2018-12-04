@@ -1,5 +1,7 @@
 # EZsinglecell
 
+
+
 ### Install
 ```
 # Install development version from GitHub:
@@ -64,6 +66,30 @@ GettsnesignatureSuper(object, object.all, signiture = c("INS", "RBP4","FFAR4", "
 Generalbubbleplot(ROCKvsnorock.non.paired,cpcol="name",genelist=df,donormalscale=F,usefacet=F)
 ```
 
+### RePACT
+library(pscl)  # For Repact analysis to calculate logistic regression pseudo-p value
+library(plot3D) # To plot 3D
+
+1. Prepareforpseudoregress.g  This function is to perform the initial regression to prepare the trajectory study
+```
+T2D.tjct.ob<-Prepareforpseudoregress.g(Beta.HSnegonly.ob,PCrange=1:10,phenodic.use=phenodic,pheno="disease",linear=F)
+```
+
+2. Toplot3Dtjct   his function is to make 3D example plot for regression analysis
+```
+Toplot3Dtjct(T2D.tjct.ob,PCrange=c(1,3,4),pheno="disease",linear=F,multiplotname="test.pdf",titlename="tittle")
+```
+
+
+3. Tjct.core.gen  This function is to compute significant trajectory genes by linear regression
+```
+T2D.tjct.2nd.ob<-Tjct.core.gen(T2D.tjct.ob)
+```
+
+4. Tjct.core.plot  This function is to generate major plots for Repact analysis
+```
+Tjct.core.plot(T2D.tjct.ob,T2D.tjct.2nd.ob,pheno="Disease",f1.name="T2D.tjct.10d.violin.pdf",f2.name="T2D.tjct.his.pdf",f3.name="T2D.tjct.trj.heatmap.pdf",f3.height=14,f3.tittle="cell type:Changing genes on phenotype trajectory\ntop6%",table1.name="T2D.tjct.traj.up.genes-q0.05Full.csv",table2.name="T2D.tjct.traj.dowb.genes-q0.05Full.csv",rankcut=0.04)
+```
 ### Data included
 - Insulin regulator gene by Crispr-screening
   - Crisp.t1
