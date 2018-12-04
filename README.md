@@ -67,9 +67,12 @@ Generalbubbleplot(ROCKvsnorock.non.paired,cpcol="name",genelist=df,donormalscale
 ```
 
 ### RePACT
+
+0. Loading packages
+```
 library(pscl)  # For Repact analysis to calculate logistic regression pseudo-p value
 library(plot3D) # To plot 3D
-
+```
 1. Prepareforpseudoregress.g  This function is to perform the initial regression to prepare the trajectory study
 ```
 T2D.tjct.ob<-Prepareforpseudoregress.g(Beta.HSnegonly.ob,PCrange=1:10,phenodic.use=phenodic,pheno="disease",linear=F)
