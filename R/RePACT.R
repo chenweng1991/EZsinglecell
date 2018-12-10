@@ -1,6 +1,6 @@
 #' Prepareforpseudoregress.g
 #'
-#' This function is to make a datapair that includes UMI/normalized UMI ,atrix as well as information table, out of one or multiple seurat objects.
+#' This function is to perform the initial regression to prepare the trajectory study
 #' @param object The seurat object for Repact study
 #' @param PCrange The PC dimensions used for modeling
 #' @param phenodic.use If there are extra data to be added, then this is a dataframe taht with one column named "Sample" for merge, also, the object@data.info has to have a column named "Sample". Otherwise, if the column for regression is already in object@data.info and phenodic.use=NULL
@@ -25,10 +25,14 @@ Prepareforpseudoregress.g<-function(object=NULL,PCrange=1:10,phenodic.use=NULL,p
 	{
 		PCvariance<-summary(object@pca.obj[[1]])$importance[,40]
 		KeyPCinformation<-data.frame(name=row.names(GetPCAcelldata_v2(object)),GetPCAcelldata_v2(object)[,c(PCrange,(ncol(GetPCAcelldata_v2(object))-1),(ncol(GetPCAcelldata_v2(object))-3))])
-		if(!is.nnull(phenodic.use))
+		if(!is.null(phenodic.use))
 		{
 		PCandPheno<-merge(KeyPCinformation,phenodic.use,by="Sample")
-		}
+	}else
+	{
+		PCandPheno<-KeyPCinformation
+	}
+		PCandPheno[, pheno]<-factor(PCandPheno[, pheno])
 		PCnames<-paste("PCandPheno$PC",PCrange,sep="")
 		form<-formula(paste("PCandPheno[,pheno]",paste(PCnames,collapse="+"),sep="~"))
 		if(linear==T)
@@ -86,6 +90,13 @@ Prepareforpseudoregress.g<-function(object=NULL,PCrange=1:10,phenodic.use=NULL,p
 
 Toplot3Dtjct<-function(trajectory.ob=tjct.ob,PCrange=1:3,pheno,linear=T, fam="binomial",enlag=10,decided=F,theta=60,phi=180,singeplotname=NULL,multiplotname,titlename="PC1-3 BMI trajectory regression\n")
 {
+	Getpallet2<-function(wN,topn,highlen,lowcolor="white")
+	{
+	myred<-colorRampPalette(brewer.pal(9,"Reds"))(highlen)
+	#myblue<-rev(colorRampPalette(brewer.pal(9,"Blues"))(lowlen))
+	mypanel<-c(rep(lowcolor,wN),myred,rep(myred[length(myred)],topn))
+	return(mypanel)
+	}
 	PCandPheno<-trajectory.ob$PCanfpheno
 	PCnames<-paste("PCandPheno$PC",PCrange,sep="")
 	PCshornames<-paste("PC",PCrange,sep="")
@@ -102,7 +113,7 @@ Toplot3Dtjct<-function(trajectory.ob=tjct.ob,PCrange=1:3,pheno,linear=T, fam="bi
 			{
 				pdf(singeplotname)
 				title<-paste(titlename,"theta=",theta,"phi=",phi)
-				scatter3D(PCandPheno[,PCshornames[1]],PCandPheno[,PCshornames[2]],PCandPheno[,PCshornames[3]],ticktype = "detailed",pch=20,theta=theta,phi=phi,colvar=as.integer(PCandPheno$BMI),bty="b2",cex=0.6,col=alpha.col(col=c(Getpallet2(0,0,11)[3:(length(Getpallet2(0,0,11))-2)]),0.4),main=title,xlab="PC1",ylab="PC2",zlab="PC3")+scatter3D(x=c(a*enlag,-a*enlag),y=c(b*enlag,-b*enlag),z=c(-c*enlag,c*enlag),type="l",ticktype = "detailed",add=T,colkey=F)
+				scatter3D(PCandPheno[,PCshornames[1]],PCandPheno[,PCshornames[2]],PCandPheno[,PCshornames[3]],ticktype = "detailed",pch=20,theta=theta,phi=phi,colvar=as.integer(PCandPheno[,pheno]),bty="b2",cex=0.6,col=alpha.col(col=c(Getpallet2(0,0,11)[3:(length(Getpallet2(0,0,11))-2)]),0.4),main=title,xlab="PC1",ylab="PC2",zlab="PC3")+scatter3D(x=c(a*enlag,-a*enlag),y=c(b*enlag,-b*enlag),z=c(-c*enlag,c*enlag),type="l",ticktype = "detailed",add=T,colkey=F)
 				dev.off()
 			}else
 			{
@@ -112,7 +123,7 @@ Toplot3Dtjct<-function(trajectory.ob=tjct.ob,PCrange=1:3,pheno,linear=T, fam="bi
 					for(j in adjustrange)
 					{
 						title<-paste(titlename,"theta=",i,"phi=",j)
-						scatter3D(PCandPheno[,PCshornames[1]],PCandPheno[,PCshornames[2]],PCandPheno[,PCshornames[3]],ticktype = "detailed",pch=20,theta=i,phi=j,colvar=as.integer(PCandPheno$BMI),bty="b2",cex=0.6,col=alpha.col(col=c(Getpallet2(0,0,11)[3:(length(Getpallet2(0,0,11))-2)]),0.4),main=title,xlab="PC1",ylab="PC2",zlab="PC3")+scatter3D(x=c(a*enlag,-a*enlag),y=c(b*enlag,-b*enlag),z=c(-c*enlag,c*enlag),type="l",ticktype = "detailed",add=T,colkey=F)
+						scatter3D(PCandPheno[,PCshornames[1]],PCandPheno[,PCshornames[2]],PCandPheno[,PCshornames[3]],ticktype = "detailed",pch=20,theta=i,phi=j,colvar=as.integer(PCandPheno[,pheno]),bty="b2",cex=0.6,col=alpha.col(col=c(Getpallet2(0,0,11)[3:(length(Getpallet2(0,0,11))-2)]),0.4),main=title,xlab="PC1",ylab="PC2",zlab="PC3")+scatter3D(x=c(a*enlag,-a*enlag),y=c(b*enlag,-b*enlag),z=c(-c*enlag,c*enlag),type="l",ticktype = "detailed",add=T,colkey=F)
 					}
 				}
 				dev.off()
@@ -129,7 +140,7 @@ Toplot3Dtjct<-function(trajectory.ob=tjct.ob,PCrange=1:3,pheno,linear=T, fam="bi
 			{
 				pdf(singeplotname)
 				title<-paste(titlename,"theta=",theta,"phi=",phi)
-				scatter3D(PCandPheno[,PCshornames[1]],PCandPheno[,PCshornames[2]],PCandPheno[,PCshornames[3]],ticktype = "detailed",pch=20,theta=theta,phi=phi,colvar=as.integer(PCandPheno$disease),bty="b2",cex=0.6,col=alpha.col(col=c("blue","red"),0.4),main=title,xlab="PC1",ylab="PC2",zlab="PC3",colkey = list(at = c(1, 2), side = 4, addlines = TRUE, length = 0.5, width = 0.5,labels = levels(PCandPheno$disease)))+scatter3D(x=c(a*enlag,-a*enlag),y=c(-b*enlag,b*enlag),z=c(c*enlag,-c*enlag),type="l",ticktype = "detailed",add=T,colkey=F)
+				scatter3D(PCandPheno[,PCshornames[1]],PCandPheno[,PCshornames[2]],PCandPheno[,PCshornames[3]],ticktype = "detailed",pch=20,theta=theta,phi=phi,colvar=as.integer(PCandPheno[,pheno]),bty="b2",cex=0.6,col=alpha.col(col=c("blue","red"),0.4),main=title,xlab="PC1",ylab="PC2",zlab="PC3",colkey = list(at = c(1, 2), side = 4, addlines = TRUE, length = 0.5, width = 0.5,labels = levels(PCandPheno[,pheno])))+scatter3D(x=c(a*enlag,-a*enlag),y=c(-b*enlag,b*enlag),z=c(c*enlag,-c*enlag),type="l",ticktype = "detailed",add=T,colkey=F)
 				dev.off()
 			}else
 			{
@@ -139,7 +150,7 @@ Toplot3Dtjct<-function(trajectory.ob=tjct.ob,PCrange=1:3,pheno,linear=T, fam="bi
 					for(j in adjustrange)
 					{
 						title<-paste(titlename,"theta=",i,"phi=",j)
-						scatter3D(PCandPheno[,PCshornames[1]],PCandPheno[,PCshornames[2]],PCandPheno[,PCshornames[3]],ticktype = "detailed",pch=20,theta=i,phi=j,colvar=as.integer(PCandPheno$disease),bty="b2",cex=0.6,col=alpha.col(col=c("blue","red"),0.4),main=title,xlab="PC1",ylab="PC2",zlab="PC3",colkey = list(at = c(1, 2), side = 4, addlines = TRUE, length = 0.5, width = 0.5,labels = levels(PCandPheno$disease)))+scatter3D(x=c(a*enlag,-a*enlag),y=c(-b*enlag,b*enlag),z=c(c*enlag,-c*enlag),type="l",ticktype = "detailed",add=T,colkey=F)
+						scatter3D(PCandPheno[,PCshornames[1]],PCandPheno[,PCshornames[2]],PCandPheno[,PCshornames[3]],ticktype = "detailed",pch=20,theta=i,phi=j,colvar=as.integer(PCandPheno[,pheno]),bty="b2",cex=0.6,col=alpha.col(col=c("blue","red"),0.4),main=title,xlab="PC1",ylab="PC2",zlab="PC3",colkey = list(at = c(1, 2), side = 4, addlines = TRUE, length = 0.5, width = 0.5,labels = levels(PCandPheno[,pheno])))+scatter3D(x=c(a*enlag,-a*enlag),y=c(-b*enlag,b*enlag),z=c(c*enlag,-c*enlag),type="l",ticktype = "detailed",add=T,colkey=F)
 					}
 				}
 			dev.off()
@@ -299,6 +310,36 @@ Tjct.core.gen<-function(object=NULL,binnumber=20,qcut=0.05)
 
 Tjct.core.plot<-function(object=NULL,secondobj=NULL,pheno=NULL,f1.name="XX.10d.violin.pdf",f2.name="XX.his.pdf",f3.name="XX.trj.heatmap.pdf",f3.height=12,f3.tittle="cell type:Changing genes on phenotype trajectory\ntop6%",table1.name="XX.traj.up.genes-q0.05top0.06.csv",table2.name="XX.traj.dowb.genes-q0.05top0.06.csv",rankcut=0.06)
 {
+	Do_heatmap<-function(bindata,df1,df2,rankname,cutoff=0.3,title,hardadd=NULL,last=T,insertinto=0,doreturn=F){
+	require(ggplot2)
+	#require(reshape2)
+	require(gridExtra)
+	DEgenelist<-c(row.names(df1)[as.numeric(as.character(df1[,rankname]))<cutoff],row.names(df2)[as.numeric(as.character(df2[,rankname]))<cutoff])
+	if(last==T)
+	{
+	#DEgenelist<-c(DEgenelist,hardadd)
+	DEgenelist.L<-DEgenelist[1:(length(DEgenelist)-insertinto)]
+	DEgenelist.R<-setdiff(DEgenelist,DEgenelist.L)
+	DEgenelist<-c(DEgenelist.L,hardadd,DEgenelist.R)
+	}else
+	{
+	#DEgenelist<-c(hardadd,DEgenelist)
+	DEgenelist.R<-DEgenelist[(insertinto+1):length(DEgenelist)]
+	DEgenelist.L<-setdiff(DEgenelist,DEgenelist.R)
+	DEgenelist<-c(DEgenelist.L,hardadd,DEgenelist.R)
+	}
+	bindata<-bindata[,c(DEgenelist,"tag")]
+	bindata<-data.frame(apply(bindata[,-ncol(bindata)],2,normalize_01),bin=bindata[,ncol(bindata)])
+	bindata.m<-reshape2::melt(bindata,id.vars="bin")
+	p<-ggplot(bindata.m)+aes(bin,variable,fill=value)+geom_tile()+scale_fill_gradient2(low="white",high="red",mid="orange",midpoint=0.6)
+	grid.arrange(p,top=title)
+	if (doreturn)
+	return(p)
+	}
+	normalize_01<-function(vector){
+	normed<-(vector-min(vector))/(max(vector)-min(vector))
+	return(normed)
+	}
 	if(is.null(pheno))
 	{
 		print(head(object$PCanfpheno))

@@ -21,7 +21,7 @@ Prepareforpseudoregress.g(object = NULL, PCrange = 1:10,
 The output include: PCvariance this summrize the percentage of variance chosen PC can explain; PCanfpheno this is a data frame including PC information, phenotype information as well as pseudo.index and residues after regression; $object.raw.withinfo: this is a datafrom of raw data with pseudo.index and residues; $model: this is the model. reg.plot.2d this is the 2d regression plot. model.para: this is the regression parameter.
 }
 \description{
-This function is to make a datapair that includes UMI/normalized UMI ,atrix as well as information table, out of one or multiple seurat objects.
+This function is to perform the initial regression to prepare the trajectory study
 }
 \examples{
 BMI.tjct.ob<-Prepareforpseudoregress.g(Beta.HSnegonly.ob,PCrange=1:10,phenodic.use=phenodic,pheno="BMI",linear=T)
