@@ -109,7 +109,8 @@ Tjct.core.plot(T2D.tjct.ob,T2D.tjct.2nd.ob,pheno="Disease",f1.name="T2D.tjct.10d
   - M.G1
   - all.cellcycle
 - Transcription factor
-  - TFfromDBD
+  - TFfromDBD(Old version)
+  - TFvector(version 18.12.18)
 - GSEA msigdb
   - msig.db
 - Beta/alpha/delta/pp/episilon specific geneset

@@ -46,19 +46,14 @@ all.cellcycle<-unique(c(G1.S,S,G2.M,M,M.G1))
 ```
 ## Prepare Transcription factor
 ```
-TFdatabase<-read.table("ht.tf.ass")
-mart <- useDataset(dataset = "hsapiens_gene_ensembl",
-                  mart    = useMart("ENSEMBL_MART_ENSEMBL",
-                  host    = "www.ensembl.org"))
-TFfromDBD <- getBM(attributes = c("ensembl_peptide_id","hgnc_symbol"),
-                     filters    = "ensembl_peptide_id",
-                     values     = unique(TFdatabase$V2),
-                     mart       = mart)
+TFdatabase<-read.table("~/DBs/DBD_transcriptionfactorDB/update.18.12.18/hs.tf.ass")
+TFdatabase.2<-read.delim("~/DBs/DBD_transcriptionfactorDB/update.18.12.18/Homo_sapiens_TF.txt")
+TFdatabase.3<-getBM(attributes= "hgnc_symbol",
+filters=c("go"),
+values="GO:0003700", mart=mart)
 TFfromDBD<-TFfromDBD[!duplicated(TFfromDBD$hgnc_symbol),]
 row.names(TFfromDBD)<-TFfromDBD$hgnc_symbol
-addedfamily<-c("SRY","SOX1","SOX2","SOX3","SOX14","SOX21","SOX4","SOX11","SOX12","SOX5","SOX6","SOX13","SOX8","SOX9","SOX10","SOX7","SOX17","SOX18","SOX15","SOX30","FOXA2")
-addfamily.df<-data.frame(row.names=addedfamily,ensembl_peptide_id=rep(NA,length(addedfamily)),hgnc_symbol=addedfamily)
-TFfromDBD<-rbind(TFfromDBD,addfamily.df)
+TFvector<-unique(c(as.character(TFfromDBD$hgnc_symbol),levels(TFdatabase.2$Symbol),TFdatabase.3$hgnc_symbol))
 ```
 ## Prepare GSEA msigdb
 ```
@@ -86,5 +81,9 @@ gene_drug.db<-read.delim("interactions.tsv",header=T)
 Hocomocogenes<-read.delim("HUMAN_mono_motifs.csv")
 ```
 
+
+
+
 # Save data
 devtools::use_data(Crisp.t1,Crisp.t2,GWASdata,Surfaceome.data,G1.S,S,G2.M,M,M.G1,all.cellcycle,TFfromDBD,msig.db,all.Beta.maker,allAlpha.marker,delta.markers,pp.markers,epsilon.markers,Beta.BMI.trj.genes,Beta.T2D.trj.genes,gene_drug.db,Hocomocogenes,overwrite=T)
+devtools::use_data(TFvector)
