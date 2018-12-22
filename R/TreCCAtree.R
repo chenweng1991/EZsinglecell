@@ -311,6 +311,7 @@ Tree.build.prepare<-function(dge1,dge2,name1,name2,first.reso=c(0.03,0.03),treem
 #' @export
 #' @examples
 #'  S4_S5ROCK.tree.prep<-Prep.res.adjust(S4_S5ROCK.tree.prep,first.reso.adjust=c(0.015,0.015))
+
 Prep.res.adjust<-function(prep,first.reso.adjust=c(0.03,0.03))  # S4.B  apply resolusion 0.015
 {
 	setwd(prep$path)
@@ -400,6 +401,7 @@ dist.matrix.prep<-function(binary.primary,datainfo.col1=c("res.0.6","nUMI","Samp
 #' @export
 #' @examples
 #'  	total.dist.matrxes<-dist.matrix.prep(primary.total,datainfo.col1=c(paste("res.",first.reso[1],sep=""),"nUMI","Sample"),cluster.col1=paste("res.",first.reso[1],sep=""),datainfo.col2=c(paste("res.",first.reso[2],sep=""),"nUMI","Sample"),cluster.col2=paste("res.",first.reso[2],sep=""),res1=paste("res.",first.reso[1],sep=""),res2=paste("res.",first.reso[2],sep=""))
+
 dist.matrix.prep.v3<-function(binary.primary,datainfo.col1=c("res.0.6","nUMI","Sample"),datainfo.col2=c("res.0.6","nUMI","Sample"),datainfo.col.dog=c("res.0.6","nUMI","Sample"),cluster.col1="res.0.6",cluster.col2="res.0.6",cluster.col.dog="res.0.6",withsingledog=F,dog.seurat.ob=NULL,neighborwithdog.seurat.ob=NULL)
 {
 	require(ggdendro)
@@ -809,6 +811,7 @@ tree.plot.v2<-function(maturername=downstremename,youngername=upstremename,withs
 #' @export
 #' @examples
 #' S4_S5ROCK.tree.2nd.primary_0.3_0.3.list<-Tree.build.2nd.clustering(S4_S5ROCK.tree.prep,S4_S5ROCK.tree.1.ob,second.reso=c(0.3,0.3))
+
 Tree.build.2nd.clustering<-function(tree.prep,tree.1.ob,second.reso=c(0.3,0.3))
 {
 
@@ -850,6 +853,7 @@ Tree.build.2nd.clustering<-function(tree.prep,tree.1.ob,second.reso=c(0.3,0.3))
 #' @export
 #' @examples
 #' S4_S5ROCK.tree.2nd.primary_0.3_0.3.list<-Tree.build.2nd.clustering(S4_S5ROCK.tree.prep,S4_S5ROCK.tree.1.ob,second.reso=c(0.3,0.3))
+
 Tree.build.2nd.clustering.patch<-function(primaries.deeper.lst,tree.prep,tree.1.ob,singledog.reso=0.3)
 {
 		Singledog.clusters<-setdiff(tree.1.ob$total.relation.plots$matrix.advance$tree.df$cluster.names[as.character(tree.1.ob$total.relation.plots$matrix.advance$tree.df$stage)==as.character(tree.1.ob$total.relation.plots$matrix.advance$segData.2_1.ordered$SeekFrom.stage.names)],as.character(tree.1.ob$total.relation.plots$matrix.advance$segData.2_1.ordered$SeekFrom.cluster.names))  # To get the cluster name who has no any relationship with upstream clusters.  I will also do clustering for it AND seperartely store it in single.seurat.list
