@@ -315,6 +315,7 @@ Tree.build.prepare<-function(dge1,dge2,name1,name2,first.reso=c(0.03,0.03),treem
 Prep.res.adjust<-function(prep,first.reso.adjust=c(0.03,0.03))  # S4.B  apply resolusion 0.015
 {
 	setwd(prep$path)
+  path=prep$path
 	name1<-names(prep$primary.total$Seurat.list)[1]
 	name2<-names(prep$primary.total$Seurat.list)[2]
 	setwd(paste(c("LowresCluster",name1,name2),collapse="."))
