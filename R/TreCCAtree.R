@@ -359,7 +359,7 @@ dist.matrix.prep<-function(binary.primary,datainfo.col1=c("res.0.6","nUMI","Samp
 	####prepare for sample1
 	ob1.PCAS.clst<-Tomerge_v2(binary.primary$Seurat.list[[1]]@pca.rot,binary.primary$Seurat.list[[1]]@data.info[,datainfo.col1])
 	ob1.info<-binary.primary$Seurat.list[[1]]@data.info[,datainfo.col1]
-	row.names(ob1.info)<-paste(samplename1,row.names(ob1.info),sep="_")
+	row.names(ob1.info)<-paste(samplename1,substr(row.names(ob1.info),1,12),sep="_")
 	ob1.info[,cluster.col1]<-paste(samplename1,ob1.info[,res1],sep="_")
 	####prepare for sample2
 	ob2.PCAS.clst<-Tomerge_v2(binary.primary$Seurat.list[[2]]@pca.rot,binary.primary$Seurat.list[[2]]@data.info[,datainfo.col2])
@@ -928,13 +928,15 @@ DOCLEAN<-function(prep,hiorlo="hi",res.tokeep=c(0.3,0.6)){
 	if(hiorlo=="hi"){
 		setwd(paste(c("Hires",name1,name2),collapse="."))
 		c(grep(paste(res.tokeep,collapse=" _ "),list.files()),grep(paste(name1,"...",res.tokeep[1],sep=""),list.files()),grep(paste(name2,"...",res.tokeep[2],sep=""),list.files()))->indextokeep
+    print(paste("To removing following",list.files()[setdiff(1:length(list.files()),indextokeep)]))
 		file.remove(list.files()[setdiff(1:length(list.files()),indextokeep)])
-		print(paste("Following is files are removed",list.files()[setdiff(1:length(list.files()),indextokeep)]))
+
 	}else if(hiorlo=="lo"){
 		setwd(paste(c("LowresCluster",name1,name2),collapse="."))
 		c(grep(paste(c(name1,"total",res.tokeep[1]),collapse="."),list.files()), grep(paste(c(name2,"total",res.tokeep[2]),collapse="."),list.files()), grep(paste(c(name1,res.tokeep[1]),collapse="."),list.files()))->indextokeep
+    print(paste("To removing following",list.files()[setdiff(1:length(list.files()),indextokeep)]))
 		file.remove(list.files()[setdiff(1:length(list.files()),indextokeep)])
-		print(paste("Following is files are removed",list.files()[setdiff(1:length(list.files()),indextokeep)]))
+
 	}
 }
 
