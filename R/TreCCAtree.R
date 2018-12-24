@@ -486,6 +486,10 @@ dist.matrix.prep.v3<-function(binary.primary,datainfo.col1=c("res.0.6","nUMI","S
 
 Tree.build.1<-function(tree.prep.ob)
 {
+  setwd(tree.prep.ob$path)
+  name1<-names(tree.prep.ob$primary.total$Seurat.list)[1]
+  name2<-names(tree.prep.ob$primary.total$Seurat.list)[2]
+  setwd(paste(c("LowresCluster",name1,name2),collapse="."))
 	primary.total<-tree.prep.ob$primary.total
 	first.reso<-tree.prep.ob$first.resos.used
 	name1<-names(tree.prep.ob$primary.total$Seurat.list)[1]
@@ -855,6 +859,7 @@ Tree.build.2nd.clustering<-function(tree.prep,tree.1.ob,second.reso=c(0.3,0.3))
 #' @examples
 #' S4_S5ROCK.tree.2nd.primary_0.3_0.3.list<-Tree.build.2nd.clustering(S4_S5ROCK.tree.prep,S4_S5ROCK.tree.1.ob,second.reso=c(0.3,0.3))
 
+
 Tree.build.2nd.clustering.patch<-function(primaries.deeper.lst,tree.prep,tree.1.ob,singledog.reso=0.3)
 {
 		Singledog.clusters<-setdiff(tree.1.ob$total.relation.plots$matrix.advance$tree.df$cluster.names[as.character(tree.1.ob$total.relation.plots$matrix.advance$tree.df$stage)==as.character(tree.1.ob$total.relation.plots$matrix.advance$segData.2_1.ordered$SeekFrom.stage.names)],as.character(tree.1.ob$total.relation.plots$matrix.advance$segData.2_1.ordered$SeekFrom.cluster.names))  # To get the cluster name who has no any relationship with upstream clusters.  I will also do clustering for it AND seperartely store it in single.seurat.list
@@ -869,7 +874,7 @@ Tree.build.2nd.clustering.patch<-function(primaries.deeper.lst,tree.prep,tree.1.
 			singledog.dge<-as.matrix(tree.prep$primary.total$Seurat.list[[2]]@raw.data[,row.names(tree.prep$primary.total$Seurat.list[[2]]@data.info)[tree.prep$primary.total$Seurat.list[[2]]@data.info$Sample.2nd==Singledog.clusters]])
 			singledog.seurat.ob<-docluster(dgepreprocess(singledog.dge,500,norowname=F),GetinformativeGene(dgepreprocess(singledog.dge,500,norowname=F),500),Singledog.clusters,reso=singledog.reso)
 
-			neighbourWithsingledog.seurat.ob<-docluster.multi(500,sets=list(primaries.deeper.lst[[1]]$Seurat.list[[1]]@raw.data,primaries.deeper.lst[[1]]$Seurat.list[[2]]@raw.data,singledog.dge),nms=c(names(primaries.deeper.lst[[1]]$Seurat.list)[1:2],Singledog.clusters))
+			neighbourWithsingledog.seurat.ob<-docluster.multi(500,sets=list(as.matrix(primaries.deeper.lst[[1]]$Seurat.list[[1]]@raw.data),as.matrix(primaries.deeper.lst[[1]]$Seurat.list[[2]]@raw.data),singledog.dge),nms=c(names(primaries.deeper.lst[[1]]$Seurat.list)[1:2],Singledog.clusters))
 			singledog.twoobs<-list(singledog.seurat.ob=singledog.seurat.ob,neighbourWithsingledog.seurat.ob=neighbourWithsingledog.seurat.ob)
 			primaries.deeper.lst<-c(primaries.deeper.lst,singledog=singledog.twoobs)
 		}
@@ -986,10 +991,10 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 				print("Printing single dog fullplot into pdf")
 				if(length(unique(primaries.deeper.lst$singledog.singledog.seurat.ob@data.info[,5]))>1)
 				{
-					fullplot.current.dog<-Fullplot_v2(primaries.deeper.lst$singledog.singledog.seurat.ob,paste(unique(primaries.deeper.lst$singledog.singledog.seurat.ob@data.info$Sample),singledog.reso,".pdf",collapse=""),signiture=NULL,resolusion=paste("res.",singledog.reso,sep=""),Pheatmap=T,P3=T,P4=T,darwPCdrive=T,P2=T,heatmapannosize=0.5,doreturn=T)
+					fullplot.current.dog<-Fullplot_v2(primaries.deeper.lst$singledog.singledog.seurat.ob,paste(unique(primaries.deeper.lst$singledog.singledog.seurat.ob@data.info$Sample),singledog.reso,".pdf",collapse=""),signiture=NULL,resolusion=paste("res.",singledog.reso,sep=""),heatmapannosize=0.5,doreturn=T)
 				}else
 				{
-					fullplot.current.dog<-Fullplot_v2(primaries.deeper.lst$singledog.singledog.seurat.ob,paste(unique(primaries.deeper.lst$singledog.singledog.seurat.ob@data.info$Sample),singledog.reso,".pdf",collapse=""),signiture=NULL,resolusion=paste("res.",singledog.reso,sep=""),Pheatmap=T,P3=T,P4=T,darwPCdrive=F,P2=T,heatmapannosize=0.5,doreturn=T)
+					fullplot.current.dog<-Fullplot_v2(primaries.deeper.lst$singledog.singledog.seurat.ob,paste(unique(primaries.deeper.lst$singledog.singledog.seurat.ob@data.info$Sample),singledog.reso,".pdf",collapse=""),signiture=NULL,resolusion=paste("res.",singledog.reso,sep=""),heatmapannosize=0.5,doreturn=T)
 				}
 			}
 			# Print out the cluster
