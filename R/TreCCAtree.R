@@ -359,6 +359,7 @@ dist.matrix.prep<-function(binary.primary,datainfo.col1=c("res.0.6","nUMI","Samp
 	####prepare for sample1
 	ob1.PCAS.clst<-Tomerge_v2(binary.primary$Seurat.list[[1]]@pca.rot,binary.primary$Seurat.list[[1]]@data.info[,datainfo.col1])
 	ob1.info<-binary.primary$Seurat.list[[1]]@data.info[,datainfo.col1]
+  ob1.info<-ob1.info[!duplicated(substr(row.names(ob1.info),1,12)),]
 	row.names(ob1.info)<-paste(samplename1,substr(row.names(ob1.info),1,12),sep="_")
 	ob1.info[,cluster.col1]<-paste(samplename1,ob1.info[,res1],sep="_")
 	####prepare for sample2
