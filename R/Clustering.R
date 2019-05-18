@@ -35,7 +35,7 @@ pbmc <- RegressOut(pbmc, latent.vars = c("nUMI", "percent.mito"))
 pbmc <- PCA(pbmc, pc.genes = pbmc@var.genes, do.print = TRUE, pcs.print = 5, genes.print = 5)
 pbmc <- ProjectPCA(pbmc)
 pbmc <- FindClusters(pbmc, pc.use = 1:10, resolution = reso, print.output = 0, save.SNN = T)
-pbmc <- RunTSNE(pbmc, dims.use = 1:10, do.fast = (ncol(Istopcells)>200))
+pbmc <- RunTSNE(pbmc, dims.use = 1:10, do.fast = (ncol(Istopcells)>200),k.seed=2)
 pbmc@data.info$Sample<-name
 return(pbmc)
 }
