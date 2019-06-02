@@ -995,7 +995,7 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 					fullplot.current.dog<-Fullplot_v2(primaries.deeper.lst$singledog.singledog.seurat.ob,paste(unique(primaries.deeper.lst$singledog.singledog.seurat.ob@data.info$Sample),singledog.reso,".pdf",collapse=""),signiture=NULL,resolusion=paste("res.",singledog.reso,sep=""),heatmapannosize=0.5,doreturn=T)
 				}else
 				{
-					fullplot.current.dog<-Fullplot_v2(primaries.deeper.lst$singledog.singledog.seurat.ob,paste(unique(primaries.deeper.lst$singledog.singledog.seurat.ob@data.info$Sample),singledog.reso,".pdf",collapse=""),signiture=NULL,resolusion=paste("res.",singledog.reso,sep=""),heatmapannosize=0.5,doreturn=T)
+  				fullplot.current.dog<-Fullplot_v2(primaries.deeper.lst$singledog.singledog.seurat.ob,paste(unique(primaries.deeper.lst$singledog.singledog.seurat.ob@data.info$Sample),singledog.reso,".pdf",collapse=""),signiture=NULL,resolusion=paste("res.",singledog.reso,sep=""),heatmapannosize=0.5,doreturn=T,darwPCdrive=F)
 				}
 			}
 			# Print out the cluster
