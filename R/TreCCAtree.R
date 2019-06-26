@@ -863,7 +863,7 @@ Tree.build.2nd.clustering<-function(tree.prep,tree.1.ob,second.reso=c(0.3,0.3))
 
 Tree.build.2nd.clustering.patch<-function(primaries.deeper.lst,tree.prep,tree.1.ob,singledog.reso=0.3)
 {
-		Singledog.clusters<-setdiff(tree.1.ob$total.relation.plots$matrix.advance$tree.df$cluster.names[as.character(tree.1.ob$total.relation.plots$matrix.advance$tree.df$stage)==as.character(tree.1.ob$total.relation.plots$matrix.advance$segData.2_1.ordered$SeekFrom.stage.names)],as.character(tree.1.ob$total.relation.plots$matrix.advance$segData.2_1.ordered$SeekFrom.cluster.names))  # To get the cluster name who has no any relationship with upstream clusters.  I will also do clustering for it AND seperartely store it in single.seurat.list
+		Singledog.clusters<-setdiff(tree.1.ob$total.relation.plots$matrix.advance$tree.df$cluster.names[as.character(tree.1.ob$total.relation.plots$matrix.advance$tree.df$stage)==unique(as.character(tree.1.ob$total.relation.plots$matrix.advance$segData.2_1.ordered$SeekFrom.stage.names))],as.character(tree.1.ob$total.relation.plots$matrix.advance$segData.2_1.ordered$SeekFrom.cluster.names))  # To get the cluster name who has no any relationship with upstream clusters.  I will also do clustering for it AND seperartely store it in single.seurat.list
 		#	single.seurat.list<-c()   ###  I annotated this part out because most commonly there would be only one single dog cluster.
 		#	for(i in length(Singledog.clusters))
 		#	{
@@ -872,12 +872,23 @@ Tree.build.2nd.clustering.patch<-function(primaries.deeper.lst,tree.prep,tree.1.
 		print(paste("Number of single dog is",length(Singledog.clusters)))
 		if (length(Singledog.clusters)>0)
 		{
+      # First to decide which lineage the dog should consider with
+      mindist=999
+      minlineage<-c()
+      for (n in 1:nrow(tree.1.ob$total.relation.plots$matrix.advance$segData.2_1.ordered)){
+        tree.1.ob$total.relation.plots$matrix.advance$segData.2_1.ordered[n,1:2] %>% t() %>% as.character -> lineage
+        if (mean(tree.1.ob$dendro.heap.p$part1.withoutdog$matrix[Singledog.clusters,lineage])<mindist)
+        {
+          mindist<-mean(tree.1.ob$dendro.heap.p$part1.withoutdog$matrix[Singledog.clusters,lineage])
+          minlineage<-paste(lineage,collapse="_")
+        }
+      }
 			singledog.dge<-as.matrix(tree.prep$primary.total$Seurat.list[[2]]@raw.data[,row.names(tree.prep$primary.total$Seurat.list[[2]]@data.info)[tree.prep$primary.total$Seurat.list[[2]]@data.info$Sample.2nd==Singledog.clusters]])
 			singledog.seurat.ob<-docluster(dgepreprocess(singledog.dge,500,norowname=F),GetinformativeGene(dgepreprocess(singledog.dge,500,norowname=F),500),Singledog.clusters,reso=singledog.reso)
-
-			neighbourWithsingledog.seurat.ob<-docluster.multi(500,sets=list(as.matrix(primaries.deeper.lst[[1]]$Seurat.list[[1]]@raw.data),as.matrix(primaries.deeper.lst[[1]]$Seurat.list[[2]]@raw.data),singledog.dge),nms=c(names(primaries.deeper.lst[[1]]$Seurat.list)[1:2],Singledog.clusters))
-			singledog.twoobs<-list(singledog.seurat.ob=singledog.seurat.ob,neighbourWithsingledog.seurat.ob=neighbourWithsingledog.seurat.ob)
-			primaries.deeper.lst<-c(primaries.deeper.lst,singledog=singledog.twoobs)
+      singledog.seurat.ob@data.info<-cbind(singledog.seurat.ob@data.info,Sample.2nd=paste(singledog.seurat.ob@data.info$Sample,singledog.seurat.ob@data.info[,paste("res",singledog.reso,sep=".")],sep="_"))
+			neighbourWithsingledog.seurat.ob<-docluster.multi(500,sets=list(as.matrix(primaries.deeper.lst[[minlineage]]$Seurat.list[[1]]@raw.data),as.matrix(primaries.deeper.lst[[minlineage]]$Seurat.list[[2]]@raw.data),singledog.dge),nms=c(names(primaries.deeper.lst[[1]]$Seurat.list)[1:2],Singledog.clusters))
+			singledog.twoobs<-list(singledog.singledog.seurat.ob=singledog.seurat.ob,singledog.neighbourWithsingledog.seurat.ob=neighbourWithsingledog.seurat.ob,singledog.minlineage=minlineage)
+			primaries.deeper.lst<-c(primaries.deeper.lst,singledog.twoobs)
 		}
 		return(primaries.deeper.lst)
 }
@@ -987,6 +998,7 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 			primaries.deeper.lst[[i]]$Seurat.list[[2]]@data.info<-cbind(primaries.deeper.lst[[i]]$Seurat.list[[2]]@data.info,Sample.2nd=paste(primaries.deeper.lst[[i]]$Seurat.list[[2]]@data.info$Sample,primaries.deeper.lst[[i]]$Seurat.list[[2]]@data.info[,paste("res.",second.reso[2],sep="")],sep="_"))
 			if(thereisdog)
 			{
+        Iscurlineage<-primaries.deeper.lst$singledog.minlineage==paste(names(primaries.deeper.lst[[i]]$Seurat.list),collapse="_")
 				primaries.deeper.lst$singledog.singledog.seurat.ob@data.info<-primaries.deeper.lst$singledog.singledog.seurat.ob@data.info[,1:6]
 				primaries.deeper.lst$singledog.singledog.seurat.ob@data.info<-cbind(primaries.deeper.lst$singledog.singledog.seurat.ob@data.info,Sample.2nd=paste(primaries.deeper.lst$singledog.singledog.seurat.ob@data.info$Sample,primaries.deeper.lst$singledog.singledog.seurat.ob@data.info[,paste("res.",singledog.reso,sep="")],sep="_"))
 				print("Printing single dog fullplot into pdf")
@@ -1006,9 +1018,10 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 			deeper.fullplots.2.lst<-c(deeper.fullplots.2.lst,list(fullplot.current.2))
 			deeper.dist.matrxes.current<-dist.matrix.prep(primaries.deeper.lst[[i]],datainfo.col1=c(paste("res.",second.reso[1],sep=""),"nUMI","Sample"),cluster.col1=paste("res.",second.reso[1],sep=""),datainfo.col2=c(paste("res.",second.reso[2],sep=""),"nUMI","Sample"),cluster.col2=paste("res.",second.reso[2],sep=""),res1=paste("res.",second.reso[1],sep=""),res2=paste("res.",second.reso[2],sep=""))
 			# This gave back distance matrix as well as segData that is critical for relationship drawing.  and importantly, the segData determines what will be further explored.  I reccomend manual inspection although integrated should be able to well tell the relationship
-			if(thereisdog)
+			if(thereisdog & Iscurlineage)
 			{
 				p.dendro<-dist.matrix.prep.v3(binary.primary=primaries.deeper.lst[[i]],datainfo.col1=c(paste("res.",second.reso[1],sep=""),"nUMI","Sample"),datainfo.col2=c(paste("res.",second.reso[2],sep=""),"nUMI","Sample"),cluster.col1=paste("res.",second.reso[1],sep=""),cluster.col2=paste("res.",second.reso[2],sep=""),cluster.col.dog=paste("res.",singledog.reso,sep=""),datainfo.col.dog=c(paste("res.",singledog.reso,sep="")),dog.seurat.ob=primaries.deeper.lst$singledog.singledog.seurat.ob,neighborwithdog.seurat.ob=primaries.deeper.lst$singledog.neighbourWithsingledog.seurat.ob,withsingledog=thereisdog)
+        print("ok1012")
 			}else
 			{
 				p.dendro<-dist.matrix.prep.v3(binary.primary=primaries.deeper.lst[[i]],datainfo.col1=c(paste("res.",second.reso[1],sep=""),"nUMI","Sample"),datainfo.col2=c(paste("res.",second.reso[2],sep=""),"nUMI","Sample"),cluster.col1=paste("res.",second.reso[1],sep=""),cluster.col2=paste("res.",second.reso[2],sep=""))
@@ -1042,7 +1055,7 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 					deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main.weak<-rbind(deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main.weak,c(SeekFrom.cluster.names=unclust,SeekToward.cluster.names=weaktarget.current,SeekFrom.stage.names=unlist(strsplit(unclust,"_"))[1],SeekToward.stage.names=unlist(strsplit(weaktarget.current,"_"))[1]))
 				}
 			}
-			if(thereisdog)
+			if(thereisdog & Iscurlineage)
 			{
 				dist.cutoff<-mean(p.dendro$part2.withdog$matrix[p.dendro$part2.withdog$matrix>0])
 				for(doggy in as.character(unique(primaries.deeper.lst$singledog.singledog.seurat.ob@data.info$Sample.2nd)))
@@ -1082,9 +1095,9 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 			}
 			## Here,  to summarize the cell numbers
 			cellnumber<-c()
-			for (x in which(!grepl("singledog.neighbourWithsingledog",names(primaries.deeper.lst))))
+			for (x in setdiff(names(primaries.deeper.lst),c("singledog.neighbourWithsingledog","singledog.minlineage")))
 			{
-				if(grepl("singledog",names(primaries.deeper.lst)[x]))
+				if(grepl("singledog",x))
 				{
 					cellnumber<-rbind(cellnumber,as.data.frame(table(primaries.deeper.lst[[x]]@data.info$Sample.2nd)))
 				}else
@@ -1095,14 +1108,14 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 			}
 			cellnumber<-cbind(cellnumber,stage=unlist(lapply(strsplit(as.character(cellnumber$Var1),"_"),function(x){x[[1]]})))
 			cellnumber<-mydplyr.percentage(cellnumber,by="stage")
-			deeper.relation.plots<-tree.plot.v2(withsingledog=thereisdog,dendrodata=p.dendro,deeper.dist.matrxes.current,textsize=relationtext,maturername=downstremename,youngername=upstremename,thecellnumber=cellnumber)   #  This will give back a relationship network (low resolution)
+			deeper.relation.plots<-tree.plot.v2(withsingledog=thereisdog & Iscurlineage,dendrodata=p.dendro,deeper.dist.matrxes.current,textsize=relationtext,maturername=downstremename,youngername=upstremename,thecellnumber=cellnumber)   #  This will give back a relationship network (low resolution)
 			deeper.dist.matrxes.lst<-c(deeper.dist.matrxes.lst,list(deeper.dist.matrxes.current))
 			deeper.relation.plots.lst<-c(deeper.relation.plots.lst,list(deeper.relation.plots))
 			names(deeper.dist.matrxes.lst)[i]<-paste(c(names(primaries.deeper.lst[[i]]$Seurat.list)),collapse="__")
 			names(deeper.relation.plots.lst)[i]<-paste(c(names(primaries.deeper.lst[[i]]$Seurat.list)),collapse="__")
 			pdf(paste(paste(c(names(primaries.deeper.lst[[i]]$Seurat.list)),collapse="__"),second.reso[1],"_",second.reso[2],"dendrogam.pdf",collapse=""),height=9,width=9)
 
-			if(thereisdog)
+			if(thereisdog & Iscurlineage)
 			{
 				print(p.dendro$part2.withdog$p.heat.dog)
 				print(p.dendro$part2.withdog$p.dendro.dog)
