@@ -80,10 +80,13 @@ gene_drug.db<-read.delim("interactions.tsv",header=T)
 ```
 Hocomocogenes<-read.delim("HUMAN_mono_motifs.csv")
 ```
-
+## prepare GSEA all gene refer
+ref.gene.tb<-read.delim("/mnt/NFS/homeGene/JinLab/cxw486/Genome/hg18/refgene/briefGene.table")
+all.genes.refer<-unique(ref.gene.tb$name2)
 
 
 
 # Save data
 devtools::use_data(Crisp.t1,Crisp.t2,GWASdata,Surfaceome.data,G1.S,S,G2.M,M,M.G1,all.cellcycle,TFfromDBD,msig.db,all.Beta.maker,allAlpha.marker,delta.markers,pp.markers,epsilon.markers,Beta.BMI.trj.genes,Beta.T2D.trj.genes,gene_drug.db,Hocomocogenes,overwrite=T)
 devtools::use_data(TFvector)
+devtools::use_data(all.genes.refer)

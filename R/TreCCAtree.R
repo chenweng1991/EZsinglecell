@@ -989,6 +989,7 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 		deeper.heat.lst<-list()
 		deeper.allmatrix.lst<-list()
 		thereisdog<-any(grepl("singledog",names(primaries.deeper.lst)))
+    Iscurlineage<-F
 		for (i in which(!grepl("singledog",names(primaries.deeper.lst))))
 		{
 			print(paste(c(i,":", names(primaries.deeper.lst[[i]]$Seurat.list)),collapse=" "))

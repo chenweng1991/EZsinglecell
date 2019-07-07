@@ -93,6 +93,17 @@ T2D.tjct.2nd.ob<-Tjct.core.gen(T2D.tjct.ob)
 ```
 Tjct.core.plot(T2D.tjct.ob,T2D.tjct.2nd.ob,pheno="Disease",f1.name="T2D.tjct.10d.violin.pdf",f2.name="T2D.tjct.his.pdf",f3.name="T2D.tjct.trj.heatmap.pdf",f3.height=14,f3.tittle="cell type:Changing genes on phenotype trajectory\ntop6%",table1.name="T2D.tjct.traj.up.genes-q0.05Full.csv",table2.name="T2D.tjct.traj.dowb.genes-q0.05Full.csv",rankcut=0.04)
 ```
+
+
+### GSEA analysis (visualization functions not included yet)
+
+1. The input is a list of several elements each of which contain a many gene names
+```
+data(all.genes.refer)
+data(msig.db)
+S7G.GSEA<-Fun.enrich_withFC(markergenesList=list(S7G=topS7G.genes),All.genes=all.genes.refer)
+```
+
 ### Data included
 - Insulin regulator gene by Crispr-screening
   - Crisp.t1
@@ -113,6 +124,7 @@ Tjct.core.plot(T2D.tjct.ob,T2D.tjct.2nd.ob,pheno="Disease",f1.name="T2D.tjct.10d
   - TFvector(version 18.12.18)
 - GSEA msigdb
   - msig.db
+  - all.genes.refer
 - Beta/alpha/delta/pp/episilon specific geneset
   - all.Beta.maker
   - allAlpha.marker
