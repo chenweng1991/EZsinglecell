@@ -12,6 +12,3 @@ Tomerge.col(df1, df2)
 \description{
 This function is an internal function doing ther merge
 }
-\examples{
-""
-}

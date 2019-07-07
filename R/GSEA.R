@@ -1,4 +1,3 @@
-
 #' Fun.enrich_withFC
 #'
 #' This function is to do GSEA enrichment analysis
@@ -185,9 +184,9 @@ Fun.enrich_withFC.pvalue<-function(markergenesList,All.genes=all.genes.refer,db=
 #' @param All=All.genes
 #' @param name
 #' @param thedatabase=db
-#' @return ""
-#' @export ""
-#' @examples ""
+#' @return
+#' @export
+#' @examples
 binomialtest.msig.enrch_deplet<-function(mylist,All=All.genes,name,thedatabase=db)
 {
 n<-length(mylist)
@@ -208,8 +207,8 @@ return(statistics)
 #' @param df1,
 #' @param df2
 #' @return ""
-#' @export ""
-#' @examples ""
+#' @export
+#' @examples
 Tomerge.col<-function(df1,df2)
 {
 	if(length(df1)==0)

@@ -7,12 +7,6 @@
 binomialtest.msig.enrch_deplet(mylist, All = All.genes, name,
   thedatabase = db)
 }
-\value{
-""
-}
 \description{
 This function is an internal function calculating the significance
-}
-\examples{
-""
 }
