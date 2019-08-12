@@ -988,7 +988,7 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 		deeper.dendro.lst<-list()
 		deeper.heat.lst<-list()
 		deeper.allmatrix.lst<-list()
-		tt<-any(grepl("singledog",names(primaries.deeper.lst)))
+		thereisdog<-any(grepl("singledog",names(primaries.deeper.lst)))
     Iscurlineage<-F
 		for (i in which(!grepl("singledog",names(primaries.deeper.lst))))
 		{
