@@ -106,6 +106,75 @@ data(msig.db)
 S7G.GSEA<-Fun.enrich_withFC(markergenesList=list(S7G=topS7G.genes),All.genes=all.genes.refer)
 ```
 
+### TreCCA tree
+1. Analyze cluster-cluster relationships between any adjacent time point (Use S6.AD and S7.B as example)
+  - **1-1 Low resolution clustering and connection analysis(To obtain two objects: *.tree.prep and *.tree.1.ob)**   *Input: dge1, dge2, appropriate resolution*
+```
+S6.AD_S7.B.tree.prep<-Tree.build.prepare(dge1=S6.AD.dge,dge2=s7.B.dge,name1="s6.AD",name2="s7.B",first.reso=c(0.03,0.03))
+S6.AD_S7.B.tree.1.ob<-Tree.build.1(S6.AD_S7.B.tree.prep)
+```
+Above two line will generate a folder and within the folder, thare are 3 PDF files:Clustering results for each time point and 1 connection result.
+
+  - **1-2 High resolution clustering and connection analysis(To obtain two objects: *.list.patched and *.ob)**   *Input:.tree.prep, .tree.1.ob from Step1*
+```
+S6.AD_S7.B.tree.2nd.primary_0.3_0.3.list<-Tree.build.2nd.clustering(S6.AD_S7.B.tree.prep,S6.AD_S7.B.tree.1.ob,second.reso=c(0.3,0.3))
+S6.AD_S7.B.tree.2nd.primary_0.3_0.3.list.patched<-Tree.build.2nd.clustering.patch(S6.AD_S7.B.tree.2nd.primary_0.3_0.3.list,S6.AD_S7.B.tree.prep,S6.AD_S7.B.tree.1.ob,singledog.reso=0.06)
+S6.AD_S7.B.tree.2nd.treemade_0.3_0.3.ob<-Tree.build.2nd.treemaking(S6.AD_S7.B.tree.2nd.primary_0.3_0.3.list.patched,second.reso=c(0.3,0.3),upstremename="s6.AD",downstremename="s7.B",dir="")
+```
+Note: 1. upstremename=name1 ,downstremename=s7.B; 2. Dir: keep consistent with Tree.build.prepare, where the Child folder was generated at Step 1
+
+2. Create a list object containing dges for each clusters across all stages
+  - Load all high resolution *.list.patched
+```
+H1_S0.tree.2nd.primary_0.06.list.patched<-readRDS("/mnt/NFS/homeGene/JinLab/cxw486/Dropseq/Entrance/Esderived/Esdrived_DGE/AttemptFrom17.8.28/RDS/H1_S0.tree.2nd.primary_0.06.list.patched.rds")
+S0_S1.24.tree.2nd.primary_0.06.list.patched<-readRDS("/mnt/NFS/homeGene/JinLab/cxw486/Dropseq/Entrance/Esderived/Esdrived_DGE/AttemptFrom17.8.28/RDS/S0_S1.24.tree.2nd.primary_0.06.list.patched.rds")
+S1.24_S1.tree.2nd.primary_0.06.list.patched<-readRDS("/mnt/NFS/homeGene/JinLab/cxw486/Dropseq/Entrance/Esderived/Esdrived_DGE/AttemptFrom17.8.28/RDS/S1.24_S1.tree.2nd.primary_0.06.list.patched.rds")  # S1_D2 with 1 cluster
+S1_S2.24.tree.2nd.primary_0.06.list.patched<-readRDS("/mnt/NFS/homeGene/JinLab/cxw486/Dropseq/Entrance/Esderived/Esdrived_DGE/AttemptFrom17.8.28/RDS/S1_S2.24.tree.2nd.primary_0.06.list.patched.rds")  # S1_D2 with 1 cluster
+S2.24_S2.48.tree.2nd.primary_0.06_0.03.list.patched<-readRDS("/mnt/NFS/homeGene/JinLab/cxw486/Dropseq/Entrance/Esderived/Esdrived_DGE/AttemptFrom17.8.28/RDS/S2.24_S2.48.tree.2nd.primary_0.06_0.03.list.patched.RDS")
+S2.48_S2.all.tree.2nd.primary_0.06.list.patched<-readRDS("/mnt/NFS/homeGene/JinLab/cxw486/Dropseq/Entrance/Esderived/Esdrived_DGE/AttemptFrom17.8.28/RDS/S2.48_S2.all.tree.2nd.primary_0.06.list.patched.rds")
+S2.all_S3.all.tree.2nd.primary_0.06.list.patched<-readRDS("/mnt/NFS/homeGene/JinLab/cxw486/Dropseq/Entrance/Esderived/Esdrived_DGE/AttemptFrom17.8.28/RDS/S2.all_S3.all.tree.2nd.primary_0.06.list.patched.rds")
+S3.all_S4.B.tree.2nd.primary_0.06_0.3.list.patched<-readRDS("/mnt/NFS/homeGene/JinLab/cxw486/Dropseq/Entrance/Esderived/Esdrived_DGE/AttemptFrom17.8.28/RDS/S3.all_S4.B.tree.2nd.primary_0.06_0.3.list.patched.RDS")
+#I made a mistake which makes S4.B_S5.all.tree.2nd.primary_0.06_0.3.list.patched not accessible S4.B_S5.all.tree.2nd.primary_0.06_0.3.list.patched<-readRDS("/mnt/NFS/homeGene/JinLab/cxw486/Dropseq/Entrance/Esderived/Esdrived_DGE/AttemptFrom17.8.28/RDS/S4.B_S5.all.tree.2nd.primary_0.06_0.3.list.patched.RDS")
+S5.all_S6.A.tree.2nd.primary_0.3_0.3.list.patched<-readRDS("/mnt/NFS/homeGene/JinLab/cxw486/Dropseq/Entrance/Esderived/Esdrived_DGE/AttemptFrom17.8.28/RDS/S5.all_S6.A.tree.2nd.primary_0.3_0.3.list.patched.RDS")
+S6.A_S7.B.tree.2nd.primary_0.3_0.3.list.patched<-readRDS("/mnt/NFS/homeGene/JinLab/cxw486/Dropseq/Entrance/Esderived/Esdrived_DGE/AttemptFrom17.8.28/RDS/S6.A_S7.B.tree.2nd.primary_0.3_0.3.list.patched")
+```
+
+```
+rawdata.lst.hi<-list(H1_S0.tree.2nd.primary_0.06.list.patched$H1_0_s0_0$Seurat.list$H1_0@raw.data)
+totalobjects.lst.hi<-list(H1_S0.tree.2nd.primary_0.06.list.patched$H1_0_s0_0$Seurat.list$H1_0)
+clusternameinfo.hi<-H1_S0.tree.2nd.primary_0.06.list.patched$H1_0_s0_0$Seurat.list$H1_0@data.info %>% cbind(.,Sample.2nd=paste(.$Sample,.[,5],sep="_")) %>% .$Sample.2nd %>% as.character() %>% unique
+Samplenameinfo.hi<-H1_S0.tree.2nd.primary_0.06.list.patched$H1_0_s0_0$Seurat.list$H1_0@data.info$Sample %>% unique
+n=1
+for (prep in list(H1_S0.tree.2nd.primary_0.06.list.patched,S0_S1.24.tree.2nd.primary_0.06.list.patched,S1.24_S1.tree.2nd.primary_0.08.list.patched,S1_S2.24.tree.2nd.primary_0.08.list.patched,S2.24_S2.48.tree.2nd.primary_0.06_0.03.list.patched,S2.48_S2.all.tree.2nd.primary_0.06.list.patched,S2.all_S3.all.tree.2nd.primary_0.06.list.patched,S3.all_S4.B.tree.2nd.primary_0.06_0.3.list.patched,S5.all_S6.A.tree.2nd.primary_0.3_0.3.list.patched,S6.A_S7.B.tree.2nd.primary_0.3_0.3.list.patched))
+{
+print(n)
+n=n+1
+for (thread in names(prep)[grepl("singledog.singledog.seurat.ob",names(prep))])
+	{
+		totalobjects.lst.hi<-c(totalobjects.lst.hi,list(prep[[thread]]))
+		cur.datainfo<-cbind(prep[[thread]]@data.info,Sample.2nd=paste(prep[[thread]]@data.info$Sample,prep[[thread]]@data.info[,5],sep="_"))
+		Samplenameinfo.hi<-c(Samplenameinfo.hi,cur.datainfo$Sample %>% unique)
+		for (cluster in levels(cur.datainfo$Sample.2nd))
+		{
+			rawdata.lst.hi<-c(rawdata.lst.hi,list(subset(cur.datainfo,Sample.2nd==cluster) %>% row.names %>% prep[[thread]]@raw.data[,.]))
+			clusternameinfo.hi<-c(clusternameinfo.hi,cluster)
+		}
+	}
+for (thread in names(prep)[!grepl("singledog",names(prep))])
+	{
+		totalobjects.lst.hi<-c(totalobjects.lst.hi,list(prep[[thread]]$Seurat.list[[2]]))
+		cur.datainfo<-cbind(prep[[thread]]$Seurat.list[[2]]@data.info,Sample.2nd=paste(prep[[thread]]$Seurat.list[[2]]@data.info$Sample,prep[[thread]]$Seurat.list[[2]]@data.info[,5],sep="_"))
+		Samplenameinfo.hi<-c(Samplenameinfo.hi,cur.datainfo$Sample %>% unique)
+		for (cluster in levels(cur.datainfo$Sample.2nd))
+		{
+			rawdata.lst.hi<-c(rawdata.lst.hi,list(subset(cur.datainfo,Sample.2nd==cluster) %>% row.names %>% prep[[thread]]$Seurat.list[[2]]@raw.data[,.]))
+			clusternameinfo.hi<-c(clusternameinfo.hi,cluster)
+		}
+	}
+}
+```
+
+
 ### Data included
 - Insulin regulator gene by Crispr-screening
   - Crisp.t1

@@ -988,7 +988,7 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 		deeper.dendro.lst<-list()
 		deeper.heat.lst<-list()
 		deeper.allmatrix.lst<-list()
-		thereisdog<-any(grepl("singledog",names(primaries.deeper.lst)))
+		tt<-any(grepl("singledog",names(primaries.deeper.lst)))
     Iscurlineage<-F
 		for (i in which(!grepl("singledog",names(primaries.deeper.lst))))
 		{
@@ -1013,11 +1013,12 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 			}
 			# Print out the cluster
 			print("Start to plot clustering into pdf...")
-			fullplot.current.1<-Fullplot_v2(primaries.deeper.lst[[i]]$Seurat.list[[1]],paste(names(primaries.deeper.lst[[i]]$Seurat.list)[1],second.reso[1],".pdf",collapse=""),signiture=NULL,resolusion=paste("res.",second.reso[1],sep=""),heatmapannosize=0.5,doreturn=T)
-			fullplot.current.2<-Fullplot_v2(primaries.deeper.lst[[i]]$Seurat.list[[2]],paste(names(primaries.deeper.lst[[i]]$Seurat.list)[2],second.reso[2],".pdf",collapse=""),signiture=NULL,resolusion=paste("res.",second.reso[2],sep=""),heatmapannosize=0.5,doreturn=T)
+      doPCAdrive<-nrow(primaries.deeper.lst[[i]]$Seurat.list[[1]]@data.info)>500
+			fullplot.current.1<-Fullplot_v2(primaries.deeper.lst[[i]]$Seurat.list[[1]],paste(names(primaries.deeper.lst[[i]]$Seurat.list)[1],second.reso[1],".pdf",collapse=""),signiture=NULL,resolusion=paste("res.",second.reso[1],sep=""),heatmapannosize=0.5,doreturn=T,darwPCdrive=doPCAdrive)
+			fullplot.current.2<-Fullplot_v2(primaries.deeper.lst[[i]]$Seurat.list[[2]],paste(names(primaries.deeper.lst[[i]]$Seurat.list)[2],second.reso[2],".pdf",collapse=""),signiture=NULL,resolusion=paste("res.",second.reso[2],sep=""),heatmapannosize=0.5,doreturn=T,darwPCdrive=doPCAdrive)
 			deeper.fullplots.1.lst<-c(deeper.fullplots.1.lst,list(fullplot.current.1))
 			deeper.fullplots.2.lst<-c(deeper.fullplots.2.lst,list(fullplot.current.2))
-			deeper.dist.matrxes.current<-dist.matrix.prep(primaries.deeper.lst[[i]],datainfo.col1=c(paste("res.",second.reso[1],sep=""),"nUMI","Sample"),cluster.col1=paste("res.",second.reso[1],sep=""),datainfo.col2=c(paste("res.",second.reso[2],sep=""),"nUMI","Sample"),cluster.col2=paste("res.",second.reso[2],sep=""),res1=paste("res.",second.reso[1],sep=""),res2=paste("res.",second.reso[2],sep=""))
+			deeper.dist.matrxes.current<-dist.matrix.prep(binary.primary=primaries.deeper.lst[[i]],datainfo.col1=c(paste("res.",second.reso[1],sep=""),"nUMI","Sample"),cluster.col1=paste("res.",second.reso[1],sep=""),datainfo.col2=c(paste("res.",second.reso[2],sep=""),"nUMI","Sample"),cluster.col2=paste("res.",second.reso[2],sep=""),res1=paste("res.",second.reso[1],sep=""),res2=paste("res.",second.reso[2],sep=""))
 			# This gave back distance matrix as well as segData that is critical for relationship drawing.  and importantly, the segData determines what will be further explored.  I reccomend manual inspection although integrated should be able to well tell the relationship
 			if(thereisdog & Iscurlineage)
 			{
@@ -1072,10 +1073,12 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 							deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main<-rbind(deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main,c(SeekFrom.cluster.names=doggy,SeekToward.cluster.names=target.current,SeekFrom.stage.names=unlist(strsplit(doggy,"_"))[1],SeekToward.stage.names=unlist(strsplit(target.current,"_"))[1]))
 						}else
 						{
-							if(nrow(deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main.weak)>1)
+							if(!is.null(deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main.weak)){
+                if(nrow(deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main.weak)>1)
 							{
 								deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main.weak$SeekFrom.cluster.names<-factor(deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main.weak$SeekFrom.cluster.names,levels=unique(c(levels(deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main.weak$SeekFrom.cluster.names),doggy)))
 							}
+              }
 							weaktarget.current<-names(current.doggy.distances)[which(current.doggy.distances==min(current.doggy.distances))]
 							deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main.weak<-rbind(deeper.dist.matrxes.current$Sample1cross2.centers$seg.Data.main.weak,c(SeekFrom.cluster.names=doggy,SeekToward.cluster.names=weaktarget.current,SeekFrom.stage.names=unlist(strsplit(doggy,"_"))[1],SeekToward.stage.names=unlist(strsplit(weaktarget.current,"_"))[1]))
 						}
