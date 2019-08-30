@@ -1171,3 +1171,310 @@ Tree.build.2nd.treemaking<-function(primaries.deeper.lst,second.reso=c(0.3,0.3),
 				deeper.fullplots.2.lst=deeper.fullplots.2.lst,deeper.dendro.lst=deeper.dendro.lst,deeper.heat.lst=deeper.heat.lst))
 		}
 	}
+
+
+#' Tree.build.2nd.treemaking
+#'
+#' Introduction\   ## To dertermine the corrdinate of each cluster
+#' @param nodes.data the all.nodes
+#' @param edges.data the all.edges
+#' @param manu.xaxis =nametransform
+#' @param by default is "V2", the column used for merging
+#' @return
+#' @export
+#' @examples
+#' hESCdiff.beta.allcell.mygraph<-makelayout(nodes.data=all.nodes,edges.data=all.edges,manu.xaxis=nametransform.rock,byy="finalname")
+makelayout<-function(nodes.data,edges.data,manu.xaxis=nametransform,byy="V2")   #  V2 is based on new name system. V1 is based on original name system
+{
+	nodes.data<-cbind(nodes.data,x=0,y=0)
+	### First loop to order the dataframe
+	for (i in nrow(edges.data):1)
+	{
+		if(length(which(as.character(edges.data[,1])==as.character(edges.data[i,2])))>0)
+		{
+			change.idx<-min(which(as.character(edges.data[,1])==as.character(edges.data[i,2])))
+			if(change.idx<i)
+			{
+				tmp<-edges.data[i,]
+				edges.data[i,]<-edges.data[change.idx,]
+				edges.data[change.idx,]<-tmp
+			}
+
+		}
+	}
+
+	### Second loop to determine the y position of all the nodes
+	for (i in 1:nrow(edges.data))
+	{
+    print (i)
+  	start.pos<-which(nodes.data$nodes==as.character(edges.data[i,1])) %>% nodes.data[.,"y"]
+		print(paste(as.character(edges.data[i,1])," start y:",start.pos))
+		end.pos<-start.pos-edges.data[i,"distance"]
+		nodes.data[which(nodes.data$nodes==as.character(edges.data[i,2])),"y"] <-end.pos
+	}
+	merge(nodes.data,manu.xaxis,by.x="nodes",by.y=byy) %>% .[,c(1,2,6,4)] ->nodes.data.x.justed
+	colnames(nodes.data.x.justed)[3]<-"x"
+	merge(edges.data,nodes.data.x.justed[,c(1,3,4)],by.x="SeekToward.cluster.names",by.y="nodes") %>% merge(.,nodes.data.x.justed[,c(1,3,4)],by.x="SeekFrom.cluster.names",by.y="nodes") -> segment.data
+	treeplot<-ggplot(nodes.data.x.justed)+aes(x,y)+geom_point()+geom_text(data=nodes.data.x.justed,aes(label=nodes),vjust=-0.1)+geom_segment(data=segment.data,aes(x=x.x,y=y.x,xend=x.y,yend=y.y),arrow=arrow(length=unit(0.1,"inch")))
+	return(list(treeplot=treeplot,nodes.data.x.justed=nodes.data.x.justed,edges.data=edges.data,segment.data=segment.data))
+}
+
+
+
+#' Get.pseudotime.byStage.pairing
+#'
+#' Introduction\
+#' @param pcawithinfo pca.withinfo
+#' @param edges.data Take all.edges or from mygraph
+#' @param hESCdiff.beta.allcell.seurate  all cluster seurat object
+#' @param PCnumber  default is 10
+#' @return
+#' @export
+#' @examples
+#'
+
+Get.pseudotime.byStage.pairing<-function(pcawithinfo=hESCdiff.beta.allcell.pca.withinfo,edges.data=all.edges,object=hESCdiff.beta.allcell.seurate,PCnumber=10,nametransformfile)
+{
+bin.data.normed_UMI.list<-list()
+for (i in 1:nrow(edges.data))
+{
+print(edges.data[i,4])
+object@data.info$Sample.trans<-plyr::mapvalues(object@data.info$Sample,from=as.character(nametransformfile$originalname),to=as.character(nametransformfile$finalname))
+print(table(subset(object@data.info,Sample.trans %in% as.character(unlist(edges.data[i,c(1,2)])))$Sample.trans)) # To print the cell number in current pair
+binnumber=as.integer(10*edges.data[i,5]/min(edges.data$distance))
+cur.pair<-c(as.character(edges.data[i,1]),as.character(edges.data[i,2]))
+cur.cellnames<-object@data.info %>% cbind(.,cell=row.names(.)) %>% subset(.,Sample.trans %in% cur.pair) %>% .$cell
+if(length(cur.cellnames)/binnumber<50)
+{
+binnumber<-as.integer(length(cur.cellnames)/50)
+}
+cur.rawdata<-object@raw.data %>%  .[,cur.cellnames] %>% as.matrix
+trj.edge.cutoff<-49
+PCA.curpair<-subset(pcawithinfo,Sample.trans %in% cur.pair)
+PCA.curpair$Sample.trans<-factor(PCA.curpair$Sample.trans,levels=cur.pair)
+traj.info<-traj.make(PCA.curpair,PCnumber,colname="Sample.trans")
+traj.info<-traj.info[complete.cases(traj.info),]
+PCA.curpair.trajinfo<-Tomerge_v2(PCA.curpair,traj.info)
+PCA.curpair.trajinfo<-PCA.curpair.trajinfo[complete.cases(PCA.curpair.trajinfo),]
+PCA.curpair.trajinfo$pos<-as.numeric(as.character(PCA.curpair.trajinfo$pos))
+PCA.curpair.trajinfo<-cbind(PCA.curpair.trajinfo,cell=row.names(PCA.curpair.trajinfo))
+traj.ob.rawwithinfo<-t(cur.rawdata) %>% as.data.frame %>% cbind(.,cell=row.names(.)) %>% merge(.,PCA.curpair.trajinfo[,c("nUMI","pos","cell")],by="cell")
+traj.ob.rawwithinfo<-traj.ob.rawwithinfo[complete.cases(traj.ob.rawwithinfo),]
+raw.bin<-givebintag.2(traj.ob.rawwithinfo,ordername="pos",bin=binnumber,genenumbercut=trj.edge.cutoff)
+print(table(raw.bin$tag))
+bin.data<-as.data.frame(mydplyr(raw.bin[,-which(colnames(raw.bin) %in% c("nUMI","cell"))]))   #  bin.data is take the mean directly from raw UMI reads number
+bin.data.normed_UMI<-cbind(t(apply(bin.data,1,function(x){(x[2:(length(x)-2)])/sum(x[2:(length(x)-2)])*1000})),bin.data[,(ncol(bin.data)-2):ncol(bin.data)])
+bin.data.normed_UMI<-bin.data.normed_UMI[order(bin.data.normed_UMI$pos),]
+print(data.frame(bin.data.normed_UMI$pos,bin.data.normed_UMI$wdth))
+bin.data.normed_UMI.list<-c(bin.data.normed_UMI.list,list(bin.data.normed_UMI))
+}
+names(bin.data.normed_UMI.list)<-edges.data$identifier
+return(bin.data.normed_UMI.list)
+}
+
+
+
+#' traj.make
+#'
+#' Introduction\
+#' @param pcdata
+#' @param PCtouse
+#' @param colname
+#' @return
+#' @export
+#' @examples
+#'
+
+traj.make<-function(pcdata,PCtouse,colname)
+{
+  calculate.pos<-function(x,pre.cen=previous.center,next.cen=next.center,pre.trj=pre.traj.axis,cur.trj=cur.traj.axis,pre.mag=pre.traj.axis.mag,cur.mag=cur.traj.axis.mag) # this function is to calculate the position of an individual cell, either project to previous trajectory axis or current axis depending on the relative distance
+  {
+    dist.pre<-sqrt(sum((x-previous.center)^2))   # Calculate the distance from a individual cell in current cluster to the center of previous center
+    dist.next<-sqrt(sum((x-next.center)^2))  # Calculate the distance from a individual cell in current cluster to the center of next center
+    pos.on.preaxis<-((as.numeric(x)-previous.center) %*% pre.trj)/pre.mag
+    pos.on.nextaxis<-((as.numeric(x)-current.center) %*% cur.trj)/cur.mag
+    if (pos.on.preaxis<pre.mag & pos.on.nextaxis<0)
+    {
+      return(list(pos.on.preaxis,"previous","clean"))
+    }else if(pos.on.preaxis>pre.mag & pos.on.nextaxis>0)
+    {
+      return(list(pos.on.nextaxis,"current","clean"))
+    }else if (pos.on.preaxis<pre.mag & pos.on.nextaxis>0)
+    {
+      if (dist.pre<dist.next)
+      {
+        return(list(pos.on.preaxis,"previous","bydistance"))
+      }else
+      {
+        return(list(pos.on.nextaxis,"current","bydistance"))
+      }
+    }else
+    {
+      return(list(NA,NA,NA))
+    }
+  }
+  for (i in 1:length(levels(pcdata[,colname])))
+  {
+    current.pcs<-subset(pcdata,get(colname)==levels(pcdata[,colname])[i])
+    current.center<-colMeans(current.pcs[,1:PCtouse])
+    if(i==1)
+    {
+      next.pcs<-subset(pcdata,get(colname)==levels(pcdata[,colname])[i+1])
+      next.center<-colMeans(next.pcs[,1:PCtouse])
+      traj.axis<-next.center-current.center
+      traj.axis.mag<-sqrt(sum(traj.axis^2))
+      first.positions<-apply((current.pcs[,1:PCtouse]),1,function(x){((as.numeric(x)-current.center) %*% traj.axis)/traj.axis.mag})
+      starting.pos<-0
+      pos.info.all<-data.frame(pos=first.positions,where="first",how="first")
+      print(paste("i==",i,"Starting",collapse=""))
+    }else if (i==length(levels(pcdata[,colname])))
+    {
+      pre.pcs<-subset(pcdata,get(colname)==levels(pcdata[,colname])[i-1])
+      pre.center<-colMeans(pre.pcs[,1:PCtouse])
+      traj.axis<-current.center-pre.center
+      traj.axis.mag<-sqrt(sum(traj.axis^2))
+      last.positions<-apply((current.pcs[,1:PCtouse]),1,function(x){((as.numeric(x)-pre.center) %*% traj.axis)/traj.axis.mag})
+      last.positions<-data.frame(pos=last.positions,where="last",how="last")
+      last.positions[,"pos"]<-last.positions[,"pos"]+starting.pos
+      pos.info.all<-rbind(pos.info.all,last.positions)
+      print(paste("i==",i,"---all finished",collapse=""))
+    }else
+    {
+      previous.pcs<-subset(pcdata,get(colname)==levels(pcdata[,colname])[i-1])
+      previous.center<-colMeans(previous.pcs[,1:PCtouse])
+      next.pcs<-subset(pcdata,get(colname)==levels(pcdata[,colname])[i+1])
+      next.center<-colMeans(next.pcs[,1:PCtouse])
+      pre.traj.axis<-current.center-previous.center
+      pre.traj.axis.mag<-sqrt(sum(pre.traj.axis^2))
+      cur.traj.axis<-next.center-current.center
+      cur.traj.axis.mag<-sqrt(sum(traj.axis^2))
+      previous.staring.pos<-starting.pos
+      starting.pos<-starting.pos+pre.traj.axis.mag
+      cur.bi.positions<-apply(current.pcs[,1:PCtouse],1,calculate.pos)
+      cur.pos.info<-data.frame(pos=t(as.data.frame(lapply(cur.bi.positions,function(x){x[[1]]}))),where=t(as.data.frame(lapply(cur.bi.positions,function(x){x[[2]]}))),how=t(as.data.frame(lapply(cur.bi.positions,function(x){x[[3]]}))))
+      cur.pos.info[which(cur.pos.info$where=="previous"),"pos"]<-cur.pos.info[which(cur.pos.info$where=="previous"),"pos"]+previous.staring.pos
+      cur.pos.info[which(cur.pos.info$where=="current"),"pos"]<-cur.pos.info[which(cur.pos.info$where=="current"),"pos"]+starting.pos
+      pos.info.all<-rbind(pos.info.all,cur.pos.info)
+      print(paste("i==",i,"",collapse=""))
+    }
+  }
+  return(pos.info.all)
+}
+
+#' givebintag.2
+#'
+#' Introduction\
+#' @param df
+#' @param ordername
+#' @param bin
+#' @param enenumbercut
+#' @return
+#' @export
+#' @examples
+#'
+
+givebintag.2<-function(df,ordername="pos",bin=20,genenumbercut=50){
+bin.initial<-bin
+v<-sort(df[,ordername])
+current.max<-max(v)
+current.min<-min(v)
+current.stepwidth<-(current.max-current.min)/bin
+leftsideset<-F
+rightsideset<-F
+leftsides<-c()
+rightsides<-c()
+n=0
+while(!all(leftsideset & rightsideset))
+{
+	print(n)
+	if(n>=0.6*bin.initial)
+	{
+		break
+	}
+	current.stepwidth<-(current.max-current.min)/bin
+	if(length(which(v>=current.min & v<(current.min+current.stepwidth)))<genenumbercut)
+	{
+		firtpoint<-v[which(v==current.min)+genenumbercut-1]
+		current.min<-firtpoint
+		leftsides<-c(leftsides,firtpoint)
+		bin=bin-1
+		n=n+1
+	}else
+	{
+		leftsideset=T
+	}
+	if(length(which(v<=current.max & v>(current.max-current.stepwidth)))<genenumbercut)
+	{
+		lastpoint<-v[which(v==current.max)-genenumbercut+1]
+		current.max<-lastpoint
+		rightsides<-c(rightsides,lastpoint)
+		bin=bin-1
+		n=n+1
+	}else
+	{
+		rightsideset=T
+	}
+}
+tags<-c()
+current.stepwidth<-(current.max-current.min)/bin
+for (i in 1:(bin-1))
+{
+leftsides<-c(leftsides,leftsides[length(leftsides)]+current.stepwidth)
+}
+if(length(leftsides)==0)
+{
+	leftsides<-min(v)+current.stepwidth
+	for (i in 1:(bin-2))
+	{
+		leftsides<-c(leftsides,leftsides[length(leftsides)]+current.stepwidth)
+	}
+}
+all.points<-unique(c(leftsides,rev(rightsides)))
+tag<-c()
+point.prev<-min(v)
+point.last<-max(v)
+all.points<-c(all.points,point.last)
+for (i in 1:length(all.points))
+{
+point=all.points[i]
+tag[which(df[,ordername]>=point.prev & df[,ordername]<point)]<-i
+point.prev<-point
+}
+tag[which(df[,ordername]==point)]<-i
+df.tag<-cbind(df,tag=tag)
+df.tag<-df.tag[order(df.tag$tag),]
+wdth<-c()
+n=1
+for (i in 1:bin.initial)
+{
+n=n+1
+print(n)
+cur.pos<-subset(df.tag,tag==i)$pos
+wdth<-c(wdth,max(cur.pos)-min(cur.pos))
+}
+df.tag<-merge(df.tag,data.frame(tag=1:bin.initial,wdth=wdth),by="tag")
+return(df.tag)
+}
+
+
+#' mydplyr
+#'
+#' Introduction\
+#' @param df
+#' @param by
+#' @param thefunction
+#' @return
+#' @export
+#' @examples
+#'
+
+mydplyr<-function(df,by="tag",thefunction=mean)
+{
+	newdf<-c()
+	for (i in as.character(unique(df[,by])))
+	{
+	dftm<-df[which(as.character(df[,by])==i),]
+	newdf<-rbind(newdf,apply(dftm,2,thefunction))
+ 	}
+return(newdf)
+}
