@@ -225,3 +225,37 @@ for (thread in names(prep)[!grepl("singledog",names(prep))])
 - datapair.mk
 - DE.gettripple
 - DoDE
+
+### Other home made functions
+
+- RunHomeGSEA (Input a ranked dataframe, and another vector for enrichment analysis, out put athe GSEA-like plot and permutatiohn-based p-value)
+```
+#RankedGeneDF is a dataframe with a column"gene", and ranked by another column "score", 
+#TestGenes  is a vector of genes that is a subset of the "gene" column of the RankedGeneDF
+
+RunHomeGSEA<-function(RankedGeneDF,TestGenes,PermutationN=1000){
+Step.Positive<-sqrt((nrow(RankedGeneDF)-length(TestGenes))/length(TestGenes))
+Step.Negative<-sqrt(length(TestGenes)/(nrow(RankedGeneDF)-length(TestGenes)))
+ES.cumulative<-c()
+StepAction<-c()
+StepAction[which(RankedGeneDF$gene %in% TestGenes)]<-Step.Positive
+StepAction[which(!RankedGeneDF$gene %in% TestGenes)]<--Step.Negative
+ES.cumulative<-cumsum(c(0,StepAction[-length(StepAction)]))
+plot<-data.frame(x=1:length(ES.cumulative),ES=ES.cumulative) %>% ggplot(.)+aes(x,ES)+geom_line()+ggtitle(cluster)
+ES.max<-max(ES.cumulative)
+## Compute nulldistributation
+random.ES.max<-c()
+for(i in 1:PermutationN){
+randomAllGene<-as.character(sample(RankedGeneDF$gene))
+RD.ES.cumulative<-c()
+StepAction<-c()
+StepAction[which(randomAllGene %in% TestGenes)]<-Step.Positive
+StepAction[which(!randomAllGene %in% TestGenes)]<--Step.Negative
+RD.ES.cumulative<-cumsum(c(0,StepAction[-length(StepAction)]))
+random.ES.max<-c(random.ES.max,max(RD.ES.cumulative))
+}
+cur.pvalue<-1-length(which(random.ES.max<ES.max))/length(random.ES.max)
+return(list(plot=plot,ES=ES.max,pvalue=cur.pvalue))
+}
+```
+
